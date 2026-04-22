@@ -6,30 +6,44 @@
 <title>人生简历 · 秋招模拟器</title>
 <style>
 :root {
-  --bg: #131210;
-  --bg-card: rgba(255,248,235,0.04);
-  --bg-card-hover: rgba(255,248,235,0.075);
-  --bg-selected: rgba(176,144,112,0.13);
-  --border: rgba(210,192,168,0.10);
-  --border-hover: rgba(210,192,168,0.22);
-  --border-selected: rgba(176,144,112,0.48);
-  --text-1: #ede8df;
-  --text-2: rgba(237,232,223,0.56);
-  --text-3: rgba(237,232,223,0.30);
-  --accent: #b09070;
-  --accent-2: #c8aa88;
-  --accent-glow: rgba(176,144,112,0.20);
-  --accent-btn: linear-gradient(135deg,#9e7e58 0%,#b8936a 50%,#c8a87c 100%);
-  --green: #7d9e8c;
-  --red: #c49898;
-  --amber: #c8a870;
-  --blue: #8aadbe;
-  --rose: #c49898;
+  /* Claude 极简人文风格配色体系 */
+  --bg: #FAF9F6;          /* 温暖的象牙白，减缓阅读疲劳 */
+  --bg-card: #FFFFFF;     /* 纯白卡片 */
+  --bg-card-hover: #FFF8F5; /* 极浅的暖橘色悬停态 */
+  --bg-selected: #F0EDE5;  /* 选中的浅暖灰色 */
+  
+  /* 强调色与按钮 (Claude 标志性陶土橘) */
+  --accent: #D97757;      /* 陶土橘强调色 */
+  --accent-2: #B57B7B;    /* 次要强调色 */
+  --accent-glow: rgba(217, 119, 87, 0.08);
+  --accent-btn: linear-gradient(135deg, #D97757 0%, #E89070 100%);
+  
+  /* 文本色 */
+  --text-1: #2D2D2D;      /* 主文本色：深灰/炭黑 */
+  --text-2: #767676;      /* 次要文本色：中性灰 */
+  --text-3: #A0A0A0;      /* 辅助文本色 */
+  
+  /* 莫兰迪属性条颜色 */
+  --green: #7D9E8C;
+  --red: #B57B7B;
+  --amber: #C29B6B;
+  --blue: #6B8B9B;
+  --rose: #B57B7B;
+  
+  /* 边框与阴影 */
+  --border: #E5E1D8;      /* 极细的暖灰边框 */
+  --border-hover: #D97757;
+  --border-selected: #D97757;
+  
   --radius: 16px;
   --radius-sm: 10px;
-  --shadow: 0 0 0 1px var(--border);
-  --shadow-card: 0 4px 32px rgba(0,0,0,0.40);
-  --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.06);
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* 字体排版 */
+  --font-serif: "Georgia", "Noto Serif SC", "Songti SC", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
@@ -37,34 +51,33 @@
 body {
   background: var(--bg);
   color: var(--text-1);
-  font-family: 'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.65;
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
   overflow-x: hidden;
 }
 
-/* ── 环境光 ── */
-.ambient {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-}
-.ambient::before {
-  content:''; position:absolute;
-  width:900px;height:900px;
-  top:-250px;left:50%;transform:translateX(-50%);
-  background: radial-gradient(circle, rgba(176,144,112,0.09) 0%, transparent 68%);
-  border-radius: 50%;
-}
-.ambient::after {
-  content:''; position:absolute;
-  width:500px;height:500px;
-  bottom:-100px;right:-100px;
-  background: radial-gradient(circle, rgba(138,173,190,0.06) 0%, transparent 70%);
-  border-radius: 50%;
-}
+/* ── 环境光（禁用以符合极简风） ── */
+.ambient { display: none; }
 
-/* ── 页面容器 ── */
+/* ── 页面容器 (模拟阅读器卡片) ── */
 #app {
-  position: relative; z-index: 1;
-  min-height: 100vh;
+  width: 100%;
+  max-width: 680px; /* 阅读器宽度 */
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 85vh;
+  z-index: 1;
 }
 
 .page { display: none; }
@@ -83,74 +96,66 @@ body {
 #page-index {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  min-height: 100vh; padding: 80px 24px;
+  min-height: 80vh; padding: 60px 24px;
   text-align: center;
 }
 
 .index-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(176,144,112,0.10);
-  border: 1px solid rgba(176,144,112,0.28);
+  background: transparent;
+  border: 1px solid var(--border);
   border-radius: 100px; padding: 6px 16px;
-  font-size: 13px; color: var(--accent-2);
-  font-weight: 500; letter-spacing: 0.3px;
-  margin-bottom: 40px;
+  font-size: 12px; color: var(--text-2);
+  font-weight: 500; letter-spacing: 1px;
+  margin-bottom: 48px;
 }
 .badge-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent-2);
-  box-shadow: 0 0 6px var(--accent);
-  animation: pulse-dot 2s ease infinite;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent);
 }
 @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
 .index-title {
-  font-size: clamp(56px,8vw,96px);
-  font-weight: 800;
-  letter-spacing: -2px;
-  line-height: 1.05;
-  background: linear-gradient(135deg,#ede8df 30%,rgba(200,170,136,0.95) 65%,rgba(158,126,88,0.85) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 20px;
+  font-family: var(--font-serif);
+  font-size: clamp(48px, 10vw, 72px);
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  color: var(--text-1); /* 移除渐变，回归纯色 */
+  margin-bottom: 16px;
 }
 .index-sub {
-  font-size: 22px; color: var(--text-2); margin-bottom: 16px;
-  letter-spacing: 0.5px;
+  font-size: 18px; color: var(--text-2); margin-bottom: 12px;
+  font-weight: 400;
 }
 .index-desc {
-  font-size: 16px; color: var(--text-3); line-height: 1.8;
-  max-width: 400px; margin: 0 auto 64px;
+  font-size: 15px; color: var(--text-3); line-height: 1.8;
+  max-width: 440px; margin: 0 auto 56px;
 }
 
 .features-row {
-  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-  max-width: 640px; margin: 0 auto 64px;
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 56px;
 }
 .feat-chip {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 100px; padding: 10px 18px;
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; color: var(--text-2);
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px;
+  font-size: 13px; color: var(--text-2);
 }
 .feat-chip-icon { font-size: 16px; }
 
 .btn-primary {
   display: inline-flex; align-items: center; gap: 10px;
-  background: var(--accent-btn);
-  border: none; border-radius: 14px;
-  padding: 18px 40px; cursor: pointer;
-  font-size: 17px; font-weight: 600; color: #fff;
-  letter-spacing: 0.3px;
-  box-shadow: 0 4px 24px rgba(158,126,88,0.30), 0 0 0 1px rgba(176,144,112,0.18);
-  transition: all var(--transition); text-decoration: none;
-  position: relative; overflow: hidden;
+  background: var(--text-1); /* 黑色/深灰按钮，极简特征 */
+  border: none; border-radius: 12px;
+  padding: 16px 48px; cursor: pointer;
+  font-size: 16px; font-weight: 500; color: #fff;
+  transition: opacity var(--transition);
+  box-shadow: none; /* 移除阴影 */
+  text-decoration: none; position: relative; overflow: hidden;
 }
-.btn-primary::after {
-  content:''; position:absolute; inset:0;
-  background: linear-gradient(135deg,rgba(255,255,255,0.10),transparent);
-}
-.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(158,126,88,0.42),0 0 0 1px rgba(176,144,112,0.28); }
-.btn-primary:active { transform:translateY(0) scale(0.98); }
+.btn-primary:hover { opacity: 0.9; transform: none; box-shadow:none;}
+.btn-primary::after { display: none; }
+.btn-primary:active { transform:scale(0.98); }
 .btn-arrow { font-size: 18px; transition: transform var(--transition); }
 .btn-primary:hover .btn-arrow { transform: translateX(4px); }
 
@@ -162,42 +167,35 @@ body {
    创建角色
 ───────────────────────────────── */
 #page-create {
-  max-width: 680px; margin: 0 auto;
-  padding: 60px 24px 120px;
+  max-width: 600px; margin: 0 auto;
+  padding: 40px 24px 100px;
 }
 
-.create-header { margin-bottom: 48px; }
+.create-header { text-align: center; margin-bottom: 40px; }
 .create-step-label {
-  font-size: 12px; color: var(--accent-2); font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;
+  font-size: 11px; color: var(--text-3); font-weight: 600;
+  letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase;
   display: block;
 }
-.create-title {
-  font-size: clamp(28px,4vw,40px); font-weight: 700;
-  color: var(--text-1); line-height: 1.2;
-  letter-spacing: -0.5px;
-}
-.create-hint {
-  font-size: 14px; color: var(--text-3); margin-top: 8px;
-}
+.create-title { font-size: 28px; font-weight: 600; color: var(--text-1); letter-spacing: -0.5px; }
+.create-hint { font-size: 14px; color: var(--text-3); margin-top: 8px; }
 
 /* 进度条 */
 .step-track {
-  display: flex; gap: 6px; margin-bottom: 40px;
+  display: flex; gap: 4px; margin-bottom: 48px;
 }
 .step-seg {
-  height: 3px; flex: 1; border-radius: 2px;
-  background: var(--border); transition: background 0.4s ease;
-  overflow: hidden; position: relative;
+  flex: 1; height: 2px; background: var(--border);
+  border-radius: 0; position: relative; transition: background 0.3s;
+  overflow: hidden;
 }
-.step-seg.done { background: rgba(176,144,112,0.55); }
-.step-seg.active { background: var(--border); }
+.step-seg.done { background: var(--text-1); }
 .step-seg.active::after {
-  content:''; position:absolute; inset:0;
-  background: var(--accent-btn);
-  animation: segFill 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+  content:''; position:absolute; top:0; bottom:0; left:0; width:50%;
+  background: var(--text-1); border-radius: 0;
+  animation: load-seg 1s ease infinite alternate;
 }
-@keyframes segFill { from{transform:scaleX(0);transform-origin:left} to{transform:scaleX(1)} }
+@keyframes load-seg { 0%{width:0%} 100%{width:100%} }
 
 /* 选项列表 */
 .opt-list { display: flex; flex-direction: column; gap: 10px; }
@@ -205,63 +203,64 @@ body {
 
 .opt-card {
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px 16px;
-  cursor: pointer; transition: all var(--transition);
-  display: flex; align-items: center; gap: 14px;
+  border-radius: 12px; padding: 20px;
+  display: flex; align-items: center; gap: 16px;
+  cursor: pointer; transition: all 0.2s;
   position: relative; overflow: hidden;
+  box-shadow: none;
 }
-.opt-card::before {
-  content:''; position:absolute; inset:0;
-  background: radial-gradient(circle at 20% 50%, rgba(176,144,112,0.07), transparent 60%);
-  opacity:0; transition: opacity var(--transition);
-}
-.opt-card:hover { background:var(--bg-card-hover); border-color:var(--border-hover); transform:translateY(-1px); }
-.opt-card:hover::before { opacity:1; }
+.opt-card::before { display: none; }
+.opt-card:hover { border-color: var(--text-1); background: var(--bg-card); }
 .opt-card.selected {
-  background: var(--bg-selected); border-color: var(--border-selected);
-  box-shadow: 0 0 0 1px rgba(176,144,112,0.14), 0 4px 16px rgba(176,144,112,0.10);
+  background: var(--bg-card); border-color: var(--text-1);
+  border-width: 1.5px;
 }
-.opt-card.selected::before { opacity:1; }
 .opt-card:active { transform: scale(0.99); }
 
 .opt-icon-wrap {
-  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
-  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+  background: var(--bg); border: none;
   display: flex; align-items: center; justify-content: center;
-  font-size: 22px; transition: all var(--transition);
+  font-size: 18px; color: var(--text-2); transition: all var(--transition);
 }
-.opt-card.selected .opt-icon-wrap {
-  background: rgba(176,144,112,0.15); border-color: rgba(176,144,112,0.32);
-}
+.opt-card.selected .opt-icon-wrap { background: var(--text-1); color: #fff; }
 .opt-body { flex: 1; min-width: 0; }
-.opt-name { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.opt-name { font-size: 15px; font-weight: 500; color: var(--text-1); margin-bottom: 4px; }
 .opt-desc { font-size: 12px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
 .opt-check {
-  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-  background: var(--accent); display: flex; align-items: center; justify-content: center;
-  opacity: 0; transform: scale(0.6); transition: all var(--transition);
-  font-size: 11px; color: #fff; font-weight: 700;
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; background: transparent;
 }
-.opt-card.selected .opt-check { opacity:1; transform:scale(1); }
+.opt-card.selected .opt-check {
+  background: var(--text-1); border-color: var(--text-1);
+}
+.opt-check::after {
+  content: ''; width: 8px; height: 4px;
+  border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+  opacity: 0; transition: 0.2s;
+}
+.opt-card.selected .opt-check::after { opacity: 1; }
 
 /* 网格卡片（专业选择） */
 .opt-tile {
+  border-radius: 12px; padding: 16px;
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 20px 12px;
-  cursor: pointer; transition: all var(--transition);
+  text-align: center; cursor: pointer; transition: all 0.2s;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
-  text-align: center; position: relative; overflow: hidden;
 }
-.opt-tile:hover { background:var(--bg-card-hover); border-color:var(--border-hover); transform:translateY(-2px); }
-.opt-tile.selected { background:var(--bg-selected); border-color:var(--border-selected); }
+.opt-tile:hover { border-color: var(--text-1); background: var(--bg-card); transform: translateY(-2px); }
+.opt-tile.selected { border-color: var(--text-1); background: var(--bg-card); border-width: 1.5px; }
 .opt-tile:active { transform: scale(0.97); }
-.opt-tile-icon { font-size: 28px; }
-.opt-tile-name { font-size: 12px; font-weight: 500; color: var(--text-2); line-height: 1.3; }
-.opt-tile.selected .opt-tile-name { color: var(--text-1); }
+.opt-tile-icon { font-size: 24px; margin-bottom: 4px; opacity: 0.6; transition: 0.2s; }
+.opt-tile.selected .opt-tile-icon { opacity: 1; transform: scale(1.1); }
+.opt-tile-name { font-size: 13px; font-weight: 500; color: var(--text-1); line-height: 1.3; }
 
 /* 底部固定按钮栏 */
 .bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
   padding: 16px 24px 28px;
   background: linear-gradient(to top, var(--bg) 60%, transparent);
   display: flex; gap: 12px; max-width: 680px; margin: 0 auto;
@@ -286,11 +285,11 @@ body {
   transition: all var(--transition); border: none;
 }
 .btn-next.enabled {
-  background: var(--accent-btn);
+  background: var(--text-1);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(158,126,88,0.28);
+  box-shadow: none;
 }
-.btn-next.enabled:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(158,126,88,0.38); }
+.btn-next.enabled:hover { transform:translateY(-1px); opacity:0.9; }
 .btn-next.enabled:active { transform:scale(0.99); }
 .btn-next.disabled {
   background: rgba(255,255,255,0.05); color: var(--text-3); cursor: not-allowed;
@@ -306,160 +305,185 @@ body {
 #page-game { min-height: 100vh; }
 
 .game-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  min-height: 100vh;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-/* ── 顶部属性 HUD（常驻） ── */
+/* ── 顶部属性状态栏 (HUD) - Claude极简、无边框、扁平化 ── */
 .attr-hud {
-  grid-column: 1/-1;
-  display: flex; gap: 8px;
-  padding: 16px 0 24px;
+  display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  gap: 16px;
 }
 .hud-item {
-  flex: 1; min-width: 80px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px 14px 10px;
-  display: flex; flex-direction: column; gap: 7px;
-  transition: border-color var(--transition);
+  flex: 1 1 calc(33.33% - 16px);
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.hud-item.hud-warn { border-color: rgba(196,152,152,0.40); background: rgba(196,152,152,0.06); }
-.hud-item.hud-ok   { border-color: rgba(125,158,140,0.35); background: rgba(125,158,140,0.05); }
-.hud-name { font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: 0.6px; }
-.hud-val  { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
-.hud-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-.hud-fill  { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
-.hud-fill-conf   { background: linear-gradient(90deg,#b09070,#c8aa88); }
-.hud-fill-stress { background: linear-gradient(90deg,#c08080,#c49898); }
-.hud-fill-anx    { background: linear-gradient(90deg,#b89860,#c8a870); }
-.hud-fill-mor    { background: linear-gradient(90deg,#6e9680,#7d9e8c); }
-.hud-fill-money  { background: linear-gradient(90deg,#7a9dae,#8aadbe); }
-.hud-fill-effort { background: linear-gradient(90deg,#9e7e58,#c8a87c); }
+.hud-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+}
+.hud-name {
+  color: var(--text-2);
+  letter-spacing: 0.5px;
+}
+.hud-val {
+  color: var(--text-1);
+  font-family: monospace; /* 数字使用等宽字体更清晰 */
+}
+/* 极细进度条 */
+.hud-track {
+  width: 100%;
+  height: 4px;
+  background: #F0EDE5;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hud-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* 单个属性颜色 */
+.hud-fill-conf   { background: var(--blue); }
+.hud-fill-stress { background: var(--stress); }
+.hud-fill-anx    { background: var(--amber); }
+.hud-fill-mor    { background: var(--green); }
+.hud-fill-effort { background: var(--accent); }
+.hud-fill-money  { background: #8E99A8; }
 
-@media (max-width: 480px) {
-  .attr-hud { gap: 6px; }
-  .hud-item { padding: 10px 10px 8px; min-width: 56px; }
-  .hud-val  { font-size: 20px; }
-  .hud-name { font-size: 10px; }
+/* 高危/优秀状态的文字颜色反馈（克制） */
+.hud-warn .hud-val { color: var(--accent-2); font-weight: 600; }
+.hud-ok .hud-val { color: var(--green); }
+
+@media (max-width: 600px) {
+  .attr-hud { padding: 20px 24px; gap: 12px; }
+  .hud-item { flex: 1 1 calc(33.33% - 12px); }
 }
 
-/* 顶栏 */
+/* 主内容区 (Event Area) - 阅读器体验 */
+.game-main { 
+  grid-column: 1; 
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  overflow-y: auto;
+}
+
+/* 顶栏简化（像书签一样安静） */
 .game-topbar {
-  grid-column: 1/-1;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 24px 0 20px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 32px;
+  padding: 0 0 16px 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 0;
 }
-.game-chapter {
-  display: flex; align-items: center; gap: 12px;
-}
+.game-chapter { display: flex; align-items: center; gap: 12px; }
 .chapter-pill {
-  background: rgba(176,144,112,0.10); border: 1px solid rgba(176,144,112,0.22);
-  border-radius: 100px; padding: 4px 12px;
-  font-size: 12px; font-weight: 600; color: var(--accent-2);
-  letter-spacing: 0.3px;
+  font-size: 14px; color: var(--text-2);
+  padding-left: 12px; border-left: 2px solid var(--border);
+  margin-bottom: -16px; font-weight: normal;
 }
-.chapter-title-text {
-  font-size: 15px; font-weight: 600; color: var(--text-1);
-}
-.progress-dots {
-  display: flex; gap: 5px; align-items: center;
-}
-.pdot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: rgba(255,255,255,0.15); transition: all 0.3s;
-}
-.pdot.done { background: rgba(176,144,112,0.55); }
-.pdot.cur { background: var(--accent); width:14px;border-radius:3px;box-shadow:0 0 6px rgba(176,144,112,0.5); }
+.chapter-title-text { font-size: 15px; font-weight: 500; color: var(--text-1); }
 
-/* 主内容区 */
-.game-main { grid-column: 1; padding-bottom: 60px; }
+/* 进度点简化 */
+.progress-dots { display: flex; gap: 5px; align-items: center; }
+.pdot { width: 5px; height: 5px; border-radius: 50%; background: #E5E1D8; transition: all 0.3s; }
+.pdot.done { background: var(--accent-2); }
+.pdot.cur { background: var(--accent); width:14px; border-radius:3px; }
 
-/* 事件卡 */
+/* 事件卡片（去除厚重边框，融入背景） */
 .event-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 32px;
-  margin-bottom: 24px; cursor: text;
-  box-shadow: var(--shadow-card);
+  background: transparent; border: none;
+  border-radius: 0; padding: 0;
+  margin-bottom: 0; box-shadow: none;
+  display: flex; flex-direction: column; gap: 12px;
 }
 .event-cat-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 12px; border-radius: 100px;
-  border: 1px solid; margin-bottom: 20px;
-  font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+  align-self: flex-start; font-size: 12px; font-weight: 600;
+  color: var(--accent); text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 10px; background: var(--bg-card-hover);
+  border-radius: 4px; border: none; margin-bottom: 0;
 }
 .event-title-text {
-  font-size: 26px; font-weight: 700; color: var(--text-1);
-  line-height: 1.3; margin-bottom: 20px; letter-spacing: -0.3px;
+  font-family: var(--font-serif); font-size: 28px; font-weight: 700;
+  color: var(--text-1); line-height: 1.4; margin-bottom: 12px;
 }
 .event-desc-text {
-  font-size: 15px; color: rgba(237,232,223,0.74);
-  line-height: 1.9; white-space: pre-wrap;
+  font-family: var(--font-serif); font-size: 17px;
+  line-height: 1.8; color: var(--text-1); white-space: pre-wrap;
 }
-.cursor { display:inline-block; color:var(--accent); animation:cur-blink 0.9s step-end infinite; }
+.cursor { display:inline-block; color:var(--text-2); font-weight: 300; animation:cur-blink 0.8s step-end infinite; margin-left: 2px;}
 @keyframes cur-blink { 0%,100%{opacity:1}50%{opacity:0} }
 
-/* 选项区 */
-.choices-wrap { animation: pageIn 0.35s ease; }
+/* 选项区域 (Choices) - 大片留白，悬浮微交互 */
+.choices-wrap { 
+  margin-top: 20px; display: flex; flex-direction: column; gap: 16px;
+  animation: pageIn 0.35s ease;
+}
 .choices-label {
-  font-size: 11px; color: var(--text-3); letter-spacing: 2.5px;
-  text-transform: uppercase; margin-bottom: 14px; display: block;
+  font-size: 13px; color: var(--text-2); font-weight: 500;
+  letter-spacing: 0.5px; margin-bottom: 4px; display: block;
 }
 .choice-btn {
-  display: flex; align-items: flex-start; gap: 14px;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px 18px;
-  cursor: pointer; transition: all var(--transition);
-  margin-bottom: 10px; width: 100%; text-align: left;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 20px 24px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 12px;
+  cursor: pointer; text-align: left; transition: all 0.25s ease;
+  position: relative; width: 100%;
 }
-.choice-btn:hover { background:var(--bg-card-hover); border-color:var(--border-hover); transform:translateX(2px); }
+.choice-btn:hover {
+  background: var(--bg-card-hover); border-color: var(--accent);
+  transform: translateY(-2px); box-shadow: 0 4px 12px rgba(217, 119, 87, 0.08);
+}
 .choice-btn.selected {
-  background:var(--bg-selected); border-color:var(--border-selected);
-  box-shadow: 0 0 0 1px rgba(176,144,112,0.12);
+  background: var(--bg-card-hover); border-color: var(--accent);
 }
 .choice-btn.dimmed { opacity: 0.35; pointer-events: none; }
 .choice-btn:active { transform:scale(0.99); }
-.choice-num {
-  width:24px; height:24px; border-radius:8px; flex-shrink:0;
-  background: rgba(255,255,255,0.06); border:1px solid var(--border);
-  font-size:12px; font-weight:700; color:var(--text-3);
-  display:flex;align-items:center;justify-content:center;
-  margin-top:1px; transition: all var(--transition);
+.choice-num { display: none; /* 隐藏编号圆圈，极简 */ }
+.choice-body { flex:1; width: 100%; }
+.choice-text { 
+  font-size: 16px; font-weight: 500; color: var(--text-1); line-height: 1.5; 
+  transition: color 0.2s;
 }
-.choice-btn.selected .choice-num { background:var(--accent); border-color:var(--accent); color:#fff; }
-.choice-body { flex:1; }
-.choice-text { font-size:15px; color:var(--text-1); line-height:1.6; }
+.choice-btn:hover .choice-text { color: var(--accent); }
 .choice-effects {
-  display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;
+  font-size: 13px; color: var(--text-2);
+  display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;
 }
-.effect-tag {
-  font-size:11px; padding:2px 8px; border-radius:6px;
-  font-weight:600; letter-spacing:0.2px;
+.fx-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 6px; border-radius: 4px; background: #F5F5F5;
+  transition: all 0.2s ease; font-size: 13px;
 }
-.effect-pos { background:rgba(125,158,140,0.12); color:#8ab09c; border:1px solid rgba(125,158,140,0.22); }
-.effect-neg { background:rgba(196,152,152,0.10); color:#c49898; border:1px solid rgba(196,152,152,0.22); }
+.fx-pos { color: var(--green); font-weight: 600; background: transparent; border: none; }
+.fx-neg { color: var(--red); font-weight: 600; background: transparent; border: none; }
 
 /* 侧边属性栏（保留兼容类名） */
 .game-sidebar { display: none; }
 .attr-fill { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
-.fill-conf { background: linear-gradient(90deg,#b09070,#c8aa88); }
-.fill-stress { background: linear-gradient(90deg,#c08080,#c49898); }
-.fill-anx { background: linear-gradient(90deg,#b89860,#c8a870); }
-.fill-mor { background: linear-gradient(90deg,#6e9680,#7d9e8c); }
-.fill-money { background: linear-gradient(90deg,#7a9dae,#8aadbe); }
+.fill-conf { background: var(--blue); }
+.fill-stress { background: var(--stress); }
+.fill-anx { background: var(--amber); }
+.fill-mor { background: var(--green); }
+.fill-money { background: #8E99A8; }
 
 .attr-divider { height: 1px; background: var(--border); margin: 16px 0; }
 
 .critical-msg {
-  font-size: 12px; color: #c49898; font-weight: 500;
+  font-size: 12px; color: var(--accent-2); font-weight: 500;
   padding: 10px 12px; background: rgba(196,152,152,0.07);
   border: 1px solid rgba(196,152,152,0.15); border-radius: 10px;
   margin-top: 14px; line-height: 1.5;
@@ -467,90 +491,98 @@ body {
 
 /* 章节过渡全屏 */
 .chapter-overlay {
-  position: fixed; inset:0; z-index:50;
+  position: fixed; inset:0; z-index:100;
   background: var(--bg); display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:12px;
-  animation: chapterAnim 2.2s ease forwards;
+  align-items:center; justify-content:center; gap:16px;
+  animation: chapterAnim 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
 }
 @keyframes chapterAnim {
-  0%{opacity:0} 15%{opacity:1} 80%{opacity:1} 100%{opacity:0}
+  0%   { opacity: 0; transform: translateY(12px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  85%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-12px); }
 }
-.ch-label { font-size:13px; color:var(--text-3); letter-spacing:4px; text-transform:uppercase; }
-.ch-title { font-size:48px; font-weight:800; letter-spacing:-1px; color:var(--text-1); }
-.ch-line { width:80px; height:1px; background: linear-gradient(90deg,transparent,rgba(200,170,136,0.6),transparent); margin-top:8px; }
+.ch-label { font-size:13px; color:var(--text-3); letter-spacing:4px; text-transform:uppercase; margin-bottom: 8px;}
+.ch-title { font-size:40px; font-weight:700; font-family:var(--font-serif); color:var(--text-1); letter-spacing:-0.5px;}
+.ch-line { display: none; }
 
-@media (max-width: 720px) {
-  .game-layout { padding: 0 16px; }
+@media (max-width: 600px) {
+  .game-main { padding: 32px 24px; }
+  .event-title-text { font-size: 24px; }
+  .event-desc-text { font-size: 16px; }
   #page-create { padding: 40px 16px 100px; }
 }
 .attr-toggle-btn { display: none; }
 .mobile-attr-panel { display: none; }
 
 /* ─────────────────────────────────
-   结局页
+   结局页 (重构：画廊风格)
 ───────────────────────────────── */
-#page-ending { min-height: 100vh; }
+#page-ending { background: var(--bg); min-height: 100vh; }
 .ending-wrap {
-  max-width: 680px; margin: 0 auto; padding: 60px 24px 80px;
+  max-width: 680px; margin: 0 auto; padding: 40px 24px 80px;
 }
 
 .ending-hero {
-  border-radius: 24px; padding: 40px 36px;
-  margin-bottom: 28px; position: relative; overflow: hidden;
+  background: var(--bg-card) !important; /* 强制背景为白 */
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 48px 24px;
+  margin-bottom: 24px; text-align: center;
 }
-.ending-hero::before {
-  content:''; position:absolute; inset:0;
-  background: rgba(0,0,0,0.15);
-}
+.ending-hero::before { display: none; }
+
 .ending-hero-content { position: relative; z-index: 1; }
 .ending-rarity-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.15); backdrop-filter:blur(8px);
-  border: 1px solid rgba(255,255,255,0.25);
+  background: var(--bg); color: var(--text-2);
+  border: 1px solid var(--border);
   border-radius: 100px; padding: 5px 14px;
-  font-size: 12px; font-weight: 600; color: #fff;
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
   margin-bottom: 20px;
 }
 .ending-main-title {
-  font-size: clamp(32px,5vw,48px); font-weight: 800;
-  color: #fff; line-height: 1.1; letter-spacing: -1px;
-  margin-bottom: 10px;
+  font-family: var(--font-serif);
+  font-size: clamp(32px,5vw,48px); font-weight: 700;
+  color: var(--text-1) !important; line-height: 1.2; letter-spacing: -1px;
+  margin-bottom: 12px;
 }
 .ending-main-sub {
-  font-size: 15px; color: rgba(255,255,255,0.75);
-  line-height: 1.6; margin-bottom: 32px;
+  font-size: 15px; color: var(--text-2) !important;
+  line-height: 1.6; max-width: 400px; margin: 0 auto 32px;
 }
 .ending-stats {
-  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+  display: flex; justify-content: center; gap: 24px;
+  border-top: 1px solid var(--border); padding-top: 24px;
 }
 .stat-item {
-  background: rgba(255,255,255,0.12); backdrop-filter:blur(8px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 12px; padding: 14px 10px; text-align: center;
+  background: transparent; border: none; padding: 0; width: auto;
+  text-align: center;
 }
-.stat-val { font-size: 24px; font-weight: 800; color: #fff; display:block; }
-.stat-key { font-size: 11px; color: rgba(255,255,255,0.6); margin-top:2px; display:block; }
+.stat-val { font-size: 20px; font-weight: 600; color: var(--text-1); font-family: var(--font-sans); display:block; }
+.stat-key { font-size: 11px; color: var(--text-3); margin-top:2px; display:block; }
 
 .story-card {
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 28px 28px;
+  border-radius: 16px; padding: 32px; box-shadow: none;
   margin-bottom: 20px;
 }
 .story-body {
-  font-size: 15px; color: rgba(237,232,223,0.78);
-  line-height: 2; white-space: pre-wrap;
+  font-family: var(--font-serif);
+  font-size: 16px; color: var(--text-1);
+  line-height: 1.9; white-space: pre-wrap;
 }
 .gold-quote {
   margin-top: 28px; padding-top: 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px dashed var(--border);
+  font-family: var(--font-sans);
   font-size: 15px; color: var(--text-2);
-  font-style: italic; line-height: 1.8; text-align: center;
+  font-weight: 500; line-height: 1.8; text-align: center;
 }
 
 .replay-card {
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 24px 28px; margin-bottom: 20px;
+  border-radius: 16px; padding: 24px 28px; margin-bottom: 20px;
 }
 .replay-card-title {
   font-size: 11px; font-weight: 600; color: var(--text-3);
@@ -558,18 +590,18 @@ body {
 }
 .replay-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
 .replay-item:last-child { border-bottom: none; padding-bottom: 0; }
-.replay-ev-name { font-size: 14px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; }
-.replay-choice { font-size: 12px; color: var(--text-3); }
-.replay-arrow { color: var(--accent-2); margin-right: 4px; }
+.replay-ev-name { font-size: 14px; font-weight: 500; color: var(--text-1); margin-bottom: 4px; }
+.replay-choice { font-size: 13px; color: var(--text-3); }
+.replay-arrow { color: var(--accent); margin-right: 4px; }
 
 .ending-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
 .btn-secondary {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 16px; width: 100%;
-  font-size: 15px; color: var(--text-2); cursor: pointer;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; width: 100%;
+  font-size: 15px; font-weight: 500; color: var(--text-2); cursor: pointer;
   transition: all var(--transition); text-align: center;
 }
-.btn-secondary:hover { background:var(--bg-card-hover); border-color:var(--border-hover); color:var(--text-1); }
+.btn-secondary:hover { background:var(--bg-card-hover); border-color:var(--accent); color:var(--text-1); }
 
 /* ── 通用工具 ── */
 .spinner {
@@ -658,10 +690,10 @@ body {
 /* ─── AI事件徽章 ─── */
 .ai-badge {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 9px; border-radius: 100px;
-  background: rgba(200,170,136,0.12); border: 1px solid rgba(200,170,136,0.28);
-  font-size: 11px; color: #c8aa88; font-weight: 600;
-  letter-spacing: 0.2px; margin-left: 8px; vertical-align: middle;
+  padding: 2px 6px; border-radius: 100px;
+  background: var(--bg-selected); border: 1px solid var(--border);
+  font-size: 10px; color: var(--text-2); font-weight: 600;
+  letter-spacing: 0; margin-left: 8px; vertical-align: middle;
 }
 
 /* ─── 分享弹层 ─── */
@@ -802,7 +834,7 @@ body {
   width: 100%; max-width: 580px;
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 20px; overflow: hidden;
-  box-shadow: var(--shadow-card);
+  margin-bottom: 24px;
 }
 .resume-top {
   display: flex; align-items: center; gap: 16px;
@@ -1015,98 +1047,98 @@ const FIXED_EVENTS = [
   {id:'F-001',type:'fixed',category:'social',chapter:1,title:'朋友圈内推轰炸',
    desc:'八月初，你的手机开始震个不停。秋招群、同学群、师兄师姐群……到处都是"字节内推码来了！""腾讯名额有限，手速快的上！"\n\n你看着屏幕，深呼一口气。秋招，真的开始了。',
    options:[
-     {id:'F-001-A',text:'广撒网，先投一百家',effect:{anxiety:10,morale:5,money:-5,effort:10},unlockFlag:'strategy_scatter'},
-     {id:'F-001-B',text:'精准出击，只投心仪的十家',effect:{confidence:5,anxiety:5,effort:8},unlockFlag:'strategy_precise'},
-     {id:'F-001-C',text:'先把题刷完再说',effect:{stress:8,morale:3,effort:12},unlockFlag:'strategy_study'},
+     {id:'F-001-A',text:'广撒网，先投一百家',effect:{anxiety:10,morale:5,money:-5,effort:4},unlockFlag:'strategy_scatter'},
+     {id:'F-001-B',text:'精准出击，只投心仪的十家',effect:{confidence:5,anxiety:5,effort:3},unlockFlag:'strategy_precise'},
+     {id:'F-001-C',text:'先把题刷完再说',effect:{stress:8,morale:3,effort:5},unlockFlag:'strategy_study'},
      {id:'F-001-D',text:'再等等，时间还早',effect:{anxiety:-5,morale:-5,effort:0},unlockFlag:'strategy_wait'},
    ],isOneShot:true},
   {id:'F-002',type:'fixed',category:'stress',chapter:1,title:'简历初稿危机',
    desc:'你打开简历，盯着那份一年没更新的Word文档沉默了三分钟。\n\n教育经历、实习经历、项目经历……怎么感觉每一行都在暴露自己的不足？\n\n"要不要找人帮我改一改？"',
    options:[
-     {id:'F-002-A',text:'付费找专业机构修改（-20金钱）',effect:{confidence:10,money:-20,effort:5},unlockFlag:'resume_paid'},
-     {id:'F-002-B',text:'求师兄师姐帮忙看看',effect:{confidence:8,morale:5,effort:8},unlockFlag:'resume_referral'},
-     {id:'F-002-C',text:'自己改，死磕到底',effect:{confidence:5,stress:5,effort:15},unlockFlag:'resume_self'},
+     {id:'F-002-A',text:'付费找专业机构修改（-20金钱）',effect:{confidence:10,money:-20,effort:2},unlockFlag:'resume_paid'},
+     {id:'F-002-B',text:'求师兄师姐帮忙看看',effect:{confidence:8,morale:5,effort:3},unlockFlag:'resume_referral'},
+     {id:'F-002-C',text:'自己改，死磕到底',effect:{confidence:5,stress:5,effort:6},unlockFlag:'resume_self'},
    ],isOneShot:true},
   {id:'F-003',type:'fixed',category:'social',chapter:1,title:'秋招群建立',
    desc:'你被拉进了一个叫"2025届秋招互助群"的微信群。\n\n里面三百个人，每天从早到晚都有消息。有人分享笔试题，有人晒offer，有人在问"被HR挂了正常吗"……\n\n你把这个群设成了免打扰，然后内心五味杂陈。',
    options:[
-     {id:'F-003-A',text:'认真看每一条消息，吸收情报',effect:{anxiety:15,confidence:5,effort:8}},
-     {id:'F-003-B',text:'只看笔经/面经，屏蔽噪音',effect:{stress:5,confidence:3,effort:5}},
+     {id:'F-003-A',text:'认真看每一条消息，吸收情报',effect:{anxiety:15,confidence:5,effort:3}},
+     {id:'F-003-B',text:'只看笔经/面经，屏蔽噪音',effect:{stress:5,confidence:3,effort:2}},
      {id:'F-003-C',text:'直接免打扰，眼不见心不烦',effect:{anxiety:-5,morale:3,effort:0}},
    ],isOneShot:true},
   {id:'F-010',type:'fixed',category:'stress',chapter:2,title:'第一封拒信',
    desc:'你投出去的第五封简历，今天有了回音。\n\n"感谢您投递XX公司，经综合评估，您的简历与岗位要求不匹配……"\n\n你盯着这封模板邮件看了很久，手机屏幕亮了又暗。\n\n第一次，就这样。',
    options:[
-     {id:'F-010-A',text:'没事的，这才第一封，继续投',effect:{confidence:-5,morale:5,effort:10}},
+     {id:'F-010-A',text:'没事的，这才第一封，继续投',effect:{confidence:-5,morale:5,effort:4}},
      {id:'F-010-B',text:'去刷了会儿手机，假装没看见',effect:{anxiety:8,stress:5,effort:-5}},
-     {id:'F-010-C',text:'认真反思简历哪里出了问题',effect:{confidence:3,stress:10,morale:3,effort:15},unlockFlag:'resume_reflect'},
+     {id:'F-010-C',text:'认真反思简历哪里出了问题',effect:{confidence:3,stress:10,morale:3,effort:6},unlockFlag:'resume_reflect'},
    ],isOneShot:true},
   {id:'F-011',type:'fixed',category:'light',chapter:2,title:'第一封笔试邀请',
    desc:'终于！\n\n邮件通知：您已通过简历筛选，请于本周六完成在线笔试，时长120分钟……\n\n你把消息转发给家人，看到妈妈回了个"加油！"和五个大拇指表情包。',
    options:[
-     {id:'F-011-A',text:'认真备考，刷历年题',effect:{confidence:8,stress:15,morale:10,effort:15},unlockFlag:'first_test_prepared'},
-     {id:'F-011-B',text:'随缘，看看水平怎么样',effect:{confidence:5,morale:12,stress:5,effort:2}},
+     {id:'F-011-A',text:'认真备考，刷历年题',effect:{confidence:8,stress:15,morale:10,effort:6},unlockFlag:'first_test_prepared'},
+     {id:'F-011-B',text:'随缘，看看水平怎么样',effect:{confidence:5,morale:12,stress:5,effort:1}},
    ],isOneShot:true},
   {id:'F-012',type:'fixed',category:'social',chapter:2,title:'国庆节：回家被催',
    desc:'难得的假期，你回了家。\n\n饭桌上，亲戚们的问题如约而至——\n\n"找工作了吗？""打算去哪个城市？""有没有编制？"\n\n你把筷子放下，深呼一口气。',
    options:[
-     {id:'F-012-A',text:'"还在努力，有进展会告诉你们的。"',effect:{stress:5,morale:3,effort:5}},
+     {id:'F-012-A',text:'"还在努力，有进展会告诉你们的。"',effect:{stress:5,morale:3,effort:2}},
      {id:'F-012-B',text:'"都投着呢，不一定的。"（敷衍）',effect:{anxiety:10,stress:8,effort:0}},
-     {id:'F-012-C',text:'借上厕所暂时逃离',effect:{anxiety:5,morale:-5,effort:-2}},
-     {id:'F-012-D',text:'借助这个契机认真聊聊未来',effect:{confidence:5,morale:8,stress:5,effort:10},unlockFlag:'family_talk'},
+     {id:'F-012-C',text:'借上厕所暂时逃离',effect:{anxiety:5,morale:-5,effort:-3}},
+     {id:'F-012-D',text:'借助这个契机认真聊聊未来',effect:{confidence:5,morale:8,stress:5,effort:4},unlockFlag:'family_talk'},
    ],isOneShot:true},
   {id:'F-020',type:'fixed',category:'interview',chapter:3,title:'第一次群面',
    desc:'你穿上了那套买了一年没穿过的正装，坐在一排陌生人旁边，等待群面开始。\n\n主考官把一道题放在屏幕上："请各位围绕\'共享经济的下一个蓝海\'进行20分钟的小组讨论。"\n\n全场沉默了三秒钟。',
    options:[
-     {id:'F-020-A',text:'第一个开口，主动担任leader',effect:{confidence:10,stress:10,effort:15},unlockFlag:'group_leader'},
-     {id:'F-020-B',text:'等别人先开口，然后补充',effect:{stress:5,anxiety:8,effort:8}},
-     {id:'F-020-C',text:'认真记录，做好timekeeper',effect:{confidence:3,morale:5,effort:10},unlockFlag:'group_timekeeper'},
+     {id:'F-020-A',text:'第一个开口，主动担任leader',effect:{confidence:10,stress:10,effort:6},unlockFlag:'group_leader'},
+     {id:'F-020-B',text:'等别人先开口，然后补充',effect:{stress:5,anxiety:8,effort:3}},
+     {id:'F-020-C',text:'认真记录，做好timekeeper',effect:{confidence:3,morale:5,effort:4},unlockFlag:'group_timekeeper'},
    ],isOneShot:true},
   {id:'F-021',type:'fixed',category:'light',chapter:3,title:'群面后的同好',
    desc:'群面结束后，大家一起走进电梯。刚才在组里一直帮你补充观点的那个女生突然转头加了你的微信。\n\n"你刚才说的那个思路真挺好的，这阵子大家都不容易，以后咱们多交流情报呀！"\n\n电梯门开了，外面的阳光正好。',
    options:[
-     {id:'F-021-A',text:'开心通过，跟她去喝了杯奶茶',effect:{stress:-15,anxiety:-10,morale:15,effort:5}},
-     {id:'F-021-B',text:'礼貌加了微信，约着以后一起刷题',effect:{stress:-10,confidence:8,effort:10}},
+     {id:'F-021-A',text:'开心通过，跟她去喝了杯奶茶',effect:{stress:-15,anxiety:-10,morale:15,effort:2}},
+     {id:'F-021-B',text:'礼貌加了微信，约着以后一起刷题',effect:{stress:-10,confidence:8,effort:4}},
    ],isOneShot:true},
   {id:'F-022',type:'fixed',category:'stress',chapter:3,title:'HR已读不回',
    desc:'那家你最看好的公司，面试后一周了，没有任何消息。\n\n你在招聘平台上给HR发了一条"请问面试结果如何"。\n\n已读。\n\n没有回复。\n\n你刷新了三次，确认那个已读的勾是真实存在的。',
    options:[
      {id:'F-022-A',text:'再等等，可能是在走流程',effect:{anxiety:20,stress:10,effort:0}},
-     {id:'F-022-B',text:'死心了，去投下一家',effect:{confidence:-10,morale:-5,stress:-5,effort:10},unlockFlag:'ghosted_once'},
-     {id:'F-022-C',text:'再发一条催催看',effect:{anxiety:5,confidence:3,effort:5}},
+     {id:'F-022-B',text:'死心了，去投下一家',effect:{confidence:-10,morale:-5,stress:-5,effort:4},unlockFlag:'ghosted_once'},
+     {id:'F-022-C',text:'再发一条催催看',effect:{anxiety:5,confidence:3,effort:2}},
    ],isOneShot:true},
   {id:'F-023',type:'fixed',category:'light',chapter:3,title:'第一个口头offer',
    desc:'HR在电话里说："我们对您非常满意，offer很快会发过来，请注意查收邮件。"\n\n你挂掉电话，在宿舍楼道里站了一分钟。\n\n然后给妈妈打了个电话，说了三个字："有了。"',
    options:[
      {id:'F-023-A',text:'立刻接受，放弃其他面试',effect:{confidence:15,stress:-20,anxiety:-20,morale:15,effort:0},unlockFlag:'first_offer_accepted'},
-     {id:'F-023-B',text:'有了保底，继续冲更好的',effect:{confidence:25,morale:20,effort:20},unlockFlag:'has_offer_keep_going'},
-     {id:'F-023-C',text:'等等，这个offer还不够好',effect:{confidence:10,anxiety:10,effort:15}},
+     {id:'F-023-B',text:'有了保底，继续冲更好的',effect:{confidence:25,morale:20,effort:8},unlockFlag:'has_offer_keep_going'},
+     {id:'F-023-C',text:'等等，这个offer还不够好',effect:{confidence:10,anxiety:10,effort:6}},
    ],isOneShot:true},
   {id:'F-030',type:'fixed',category:'stress',chapter:4,title:'漫长的等待',
    desc:'十一月的某一天，你意识到自己已经三天没投简历了。\n\n不是不想投，而是……已经不知道该投什么了。\n\n手机里存着七八个"等待结果"的公司，它们像石头一样沉在心底。',
    options:[
-     {id:'F-030-A',text:'重新梳理，继续海投',effect:{stress:10,morale:5,anxiety:8,effort:15}},
-     {id:'F-030-B',text:'给所有在等的公司发一遍进度询问',effect:{anxiety:5,confidence:3,effort:8}},
+     {id:'F-030-A',text:'重新梳理，继续海投',effect:{stress:10,morale:5,anxiety:8,effort:6}},
+     {id:'F-030-B',text:'给所有在等的公司发一遍进度询问',effect:{anxiety:5,confidence:3,effort:3}},
      {id:'F-030-C',text:'放空三天，休息一下',effect:{stress:-10,anxiety:-5,morale:8,effort:-5},unlockFlag:'took_rest'},
    ],isOneShot:true},
   {id:'F-031',type:'fixed',category:'light',chapter:4,title:'一个包裹',
    desc:'你收到一个没写寄件人的快递。\n\n拆开一看，是两罐你最爱吃的家乡特产牛肉酱，还有一双加绒的厚袜子。\n\n微信上弹出来一条消息："天气冷了，别太拼，实在不行就回家，家里总有你一口饭吃。"\n\n你看着屏幕，眼眶突然有点酸。',
    options:[
-     {id:'F-031-A',text:'立刻打个视频电话回去',effect:{stress:-25,anxiety:-20,morale:20,effort:5}},
-     {id:'F-031-B',text:'回了一条"我很好，放心吧"，继续改简历',effect:{stress:-15,confidence:10,effort:15}},
+     {id:'F-031-A',text:'立刻打个视频电话回去',effect:{stress:-25,anxiety:-20,morale:20,effort:2}},
+     {id:'F-031-B',text:'回了一条"我很好，放心吧"，继续改简历',effect:{stress:-15,confidence:10,effort:6}},
    ],isOneShot:true},
   {id:'F-032',type:'fixed',category:'social',chapter:4,title:'好友上岸了',
    desc:'室友小张把手机屏幕推过来：是腾讯的offer截图。\n\n"哈，终于！你也快了！"\n\n他说得很自然，没有任何炫耀的意思。但你心里有什么东西，悄悄刺了一下。',
    options:[
-     {id:'F-032-A',text:'真心为他高兴，问问他面试经验',effect:{confidence:5,morale:5,anxiety:5,effort:10}},
-     {id:'F-032-B',text:'恭喜完就去图书馆，不想待在宿舍',effect:{anxiety:15,stress:10,morale:-5,effort:15}},
-     {id:'F-032-C',text:'把这个当成动力，告诉自己快了',effect:{morale:10,confidence:3,anxiety:8,effort:12}},
+     {id:'F-032-A',text:'真心为他高兴，问问他面试经验',effect:{confidence:5,morale:5,anxiety:5,effort:4}},
+     {id:'F-032-B',text:'恭喜完就去图书馆，不想待在宿舍',effect:{anxiety:15,stress:10,morale:-5,effort:6}},
+     {id:'F-032-C',text:'把这个当成动力，告诉自己快了',effect:{morale:10,confidence:3,anxiety:8,effort:5}},
    ],isOneShot:true},
   {id:'F-040',type:'fixed',category:'turning',chapter:5,title:'Offer抉择时刻',
    desc:'十二月中旬，你整理了一下手里的牌：\n\n还在等的公司还有两家，但offer期限截止日期就在明天。\n\n你盯着屏幕上的表格——薪资、城市、稳定性、发展前景……每一列都有自己的理由。\n\n要做决定了。',
    options:[
-     {id:'F-040-A',text:'接受现有最好的offer，上岸为先',effect:{stress:-25,anxiety:-25,confidence:15,morale:10,effort:5},unlockFlag:'offer_accepted'},
-     {id:'F-040-B',text:'再赌最后一次，继续等梦想公司',effect:{stress:15,anxiety:20,effort:15},unlockFlag:'gambling_last'},
+     {id:'F-040-A',text:'接受现有最好的offer，上岸为先',effect:{stress:-25,anxiety:-25,confidence:15,morale:10,effort:2},unlockFlag:'offer_accepted'},
+     {id:'F-040-B',text:'再赌最后一次，继续等梦想公司',effect:{stress:15,anxiety:20,effort:6},unlockFlag:'gambling_last'},
      {id:'F-040-C',text:'放弃秋招，考虑其他出路',effect:{morale:-10,anxiety:10,confidence:-5,effort:-10},unlockFlag:'gave_up_qiuzhao'},
    ],isOneShot:true},
 ]
@@ -1115,49 +1147,49 @@ const CONDITIONAL_EVENTS = [
   {id:'C-CS-001',type:'conditional',category:'stress',title:'力扣日记',
    desc:'你已经连续刷了三十天力扣。\n\n今天面试的算法题是一道"字节高频题"，你明明见过，就是脑子一片空白。\n\n事后你查了题解，发现就是上周刷过的原题。你盯着题解看了很久，没说话。',
    options:[
-     {id:'C-CS-001-A',text:'死磕，再刷一遍',effect:{stress:15,confidence:5,morale:3,effort:20}},
-     {id:'C-CS-001-B',text:'换个方法，去找专项练习',effect:{stress:5,confidence:8,effort:15}},
-     {id:'C-CS-001-C',text:'找内推跳过笔试',effect:{confidence:10,morale:8,effort:5},unlockFlag:'used_referral'},
+     {id:'C-CS-001-A',text:'死磕，再刷一遍',effect:{stress:15,confidence:5,morale:3,effort:8}},
+     {id:'C-CS-001-B',text:'换个方法，去找专项练习',effect:{stress:5,confidence:8,effort:6}},
+     {id:'C-CS-001-C',text:'找内推跳过笔试',effect:{confidence:10,morale:8,effort:2},unlockFlag:'used_referral'},
    ],
    triggerCondition:{majors:['cs'],minChapter:2},weight:3},
   {id:'C-FIN-001',type:'conditional',category:'social',title:'鄙视链现场',
    desc:'群面现场，复旦金融的同学在自我介绍时说："我目前只考虑高盛和摩根，其他的都是备选。"\n\n他说这句话时神情自然，不带一点炫耀。\n\n你抬头看了他一眼，然后低下头整理了一下自己的发言提纲。',
    options:[
-     {id:'C-FIN-001-A',text:'不在乎，专注自己的表现',effect:{confidence:3,morale:5,effort:10}},
-     {id:'C-FIN-001-B',text:'有点动摇，感觉自己不够格',effect:{confidence:-15,anxiety:12,effort:-5}},
-     {id:'C-FIN-001-C',text:'他也没有offer，谁知道最后怎样',effect:{morale:8,confidence:5,effort:8}},
+     {id:'C-FIN-001-A',text:'不在乎，专注自己的表现',effect:{confidence:3,morale:5,effort:4}},
+     {id:'C-FIN-001-B',text:'有点动摇，感觉自己不够格',effect:{confidence:-15,anxiety:12,effort:-3}},
+     {id:'C-FIN-001-C',text:'他也没有offer，谁知道最后怎样',effect:{morale:8,confidence:5,effort:3}},
    ],
    triggerCondition:{majors:['finance'],minChapter:3},weight:2},
   {id:'C-MED-001',type:'conditional',category:'social',title:'规培困境',
    desc:'你在医院实习，规培工资1500块/月。\n\n高中同班同学在互联网公司发了张图，说今天加班但是"痛并快乐着"，配了一张餐厅的炸鸡腿。\n\n你看着手里的工作餐，点了个赞，然后把手机放进口袋。',
    options:[
-     {id:'C-MED-001-A',text:'医生是有意义的职业，我不后悔',effect:{morale:10,confidence:8,anxiety:5,effort:10}},
-     {id:'C-MED-001-B',text:'有点动摇，考虑转行',effect:{confidence:-10,anxiety:20,morale:-10,effort:-5}},
-     {id:'C-MED-001-C',text:'熬过规培就好了，以后不一样',effect:{morale:5,stress:10,effort:15}},
+     {id:'C-MED-001-A',text:'医生是有意义的职业，我不后悔',effect:{morale:10,confidence:8,anxiety:5,effort:4}},
+     {id:'C-MED-001-B',text:'有点动摇，考虑转行',effect:{confidence:-10,anxiety:20,morale:-10,effort:-3}},
+     {id:'C-MED-001-C',text:'熬过规培就好了，以后不一样',effect:{morale:5,stress:10,effort:6}},
    ],
    triggerCondition:{majors:['medicine']},weight:3,isOneShot:true},
   {id:'C-CIVIL-001',type:'conditional',category:'stress',title:'行业寒冬',
    desc:'你打开招聘软件，发现今年建筑类岗位的数量比去年少了一半。\n\n某大型设计院的招聘负责人说，由于市场环境，今年HC有所缩减……\n\n你的同学里，有三个已经转行准备考公了。',
    options:[
-     {id:'C-CIVIL-001-A',text:'坚守本专业，总有地方要人',effect:{confidence:5,stress:15,anxiety:10,effort:15}},
-     {id:'C-CIVIL-001-B',text:'考虑转型——项目管理/房地产咨询',effect:{anxiety:8,morale:3,effort:10}},
-     {id:'C-CIVIL-001-C',text:'准备考公/事业单位，求稳',effect:{morale:-5,anxiety:-5,effort:15}},
+     {id:'C-CIVIL-001-A',text:'坚守本专业，总有地方要人',effect:{confidence:5,stress:15,anxiety:10,effort:6}},
+     {id:'C-CIVIL-001-B',text:'考虑转型——项目管理/房地产咨询',effect:{anxiety:8,morale:3,effort:4}},
+     {id:'C-CIVIL-001-C',text:'准备考公/事业单位，求稳',effect:{morale:-5,anxiety:-5,effort:6}},
    ],
    triggerCondition:{majors:['civil'],minChapter:2},weight:3,isOneShot:true},
   {id:'C-EDU-001',type:'conditional',category:'stress',title:'学历歧视现场',
    desc:'你打开心仪公司的JD，看到最后一行：\n\n"学历要求：211/985院校本科及以上。"\n\n你把页面滑回顶部，看了看公司logo，再看了看自己的简历。',
    options:[
-     {id:'C-EDU-001-A',text:'还是投，简历不一定被卡',effect:{confidence:3,anxiety:10,effort:15}},
-     {id:'C-EDU-001-B',text:'找有内推的人走后门',effect:{morale:5,confidence:8,effort:10},unlockFlag:'used_referral'},
-     {id:'C-EDU-001-C',text:'换目标，这家不适合我',effect:{morale:-5,anxiety:-5,effort:5}},
-     {id:'C-EDU-001-D',text:'好，让我记住这个名字，以后再说',effect:{morale:10,confidence:5,effort:10}},
+     {id:'C-EDU-001-A',text:'还是投，简历不一定被卡',effect:{confidence:3,anxiety:10,effort:6}},
+     {id:'C-EDU-001-B',text:'找有内推的人走后门',effect:{morale:5,confidence:8,effort:4},unlockFlag:'used_referral'},
+     {id:'C-EDU-001-C',text:'换目标，这家不适合我',effect:{morale:-5,anxiety:-5,effort:2}},
+     {id:'C-EDU-001-D',text:'好，让我记住这个名字，以后再说',effect:{morale:10,confidence:5,effort:4}},
    ],
    triggerCondition:{schoolTiers:['C','D'],minChapter:2},weight:3},
   {id:'C-EDU-002',type:'conditional',category:'stress',title:'顶校光环的重量',
    desc:'面试官看到你的学校，眼睛亮了一下，然后问了一句让你噎住的话：\n\n"你们学校这么好，为什么来我们这种公司？"\n\n这句话的答案，你回答过很多次，但每一次都感觉有点不对。',
    options:[
-     {id:'C-EDU-002-A',text:'"贵司的业务方向和我的规划高度契合。"',effect:{confidence:5,stress:5,effort:8}},
-     {id:'C-EDU-002-B',text:'"我认为企业文化比平台名气更重要。"',effect:{confidence:8,morale:5,effort:8}},
+     {id:'C-EDU-002-A',text:'"贵司的业务方向和我的规划高度契合。"',effect:{confidence:5,stress:5,effort:3}},
+     {id:'C-EDU-002-B',text:'"我认为企业文化比平台名气更重要。"',effect:{confidence:8,morale:5,effort:3}},
      {id:'C-EDU-002-C',text:'"……"（沉默了一下，没想好怎么说）',effect:{confidence:-5,stress:10,effort:0}},
    ],
    triggerCondition:{schoolTiers:['A'],minChapter:3},weight:2},
@@ -1190,11 +1222,11 @@ function getInitialAttributes(player) {
   if(tier==='D'){c-=10;m+=5}
   if(player.edu==='phd'){a+=10}
   if(player.edu==='master_985'){c+=5;s+=5}
-  if(player.backgrounds.includes('big_tech_intern')){c+=15;e+=10}
-  if(player.backgrounds.includes('financial_pressure')){money-=20;a+=10;e+=5}
-  if(player.backgrounds.includes('cross_major')){c-=10;a+=5;e+=10}
+  if(player.backgrounds.includes('big_tech_intern')){c+=15;e+=5}
+  if(player.backgrounds.includes('financial_pressure')){money-=20;a+=10;e+=3}
+  if(player.backgrounds.includes('cross_major')){c-=10;a+=5;e+=5}
   if(player.backgrounds.includes('family_connections')){money+=10}
-  if(player.backgrounds.includes('competition_award')){c+=8;e+=15}
+  if(player.backgrounds.includes('competition_award')){c+=8;e+=8}
   const cl=v=>Math.min(100,Math.max(0,v))
   return {confidence:cl(c),stress:cl(s),anxiety:cl(a),morale:cl(m),money:cl(money),effort:cl(e)}
 }
@@ -1279,14 +1311,14 @@ function determineEnding(state){
   const highConf  = at.confidence >= 68
   const lowStress = at.stress < 58
   const highMoral = at.morale >= 58
-  const highEffort = at.effort >= 85                   // 新增：高努力值判定
+  const highEffort = at.effort >= 75                   // 新增：高努力值判定
   const collapsed = at.stress >= 82 && at.anxiety >= 78
   const burnout   = at.stress >= 76 && at.morale < 32
   const calm      = at.stress < 45  && at.anxiety < 45
   // 新增：天道酬勤，高努力值增加上岸机会
   const hasOffer  = fl.has('offer_accepted') || fl.has('first_offer_accepted')
                  || (highConf && at.morale >= 55 && at.stress < 65)
-                 || (at.effort >= 80 && at.morale >= 40) 
+                 || (at.effort >= 70 && at.morale >= 40) 
   const unhappyOffer = hasOffer && at.morale < 38 && at.stress > 62
 
   // ── 二次崩溃条件 ──
@@ -1624,7 +1656,7 @@ function renderGame(){
     <div class="game-main">
       ${ev?`
       <div class="event-card" id="event-card">
-        <div class="event-cat-badge" style="background:${cat.bg};border-color:${cat.bd};color:${cat.txt}">${cat.lbl}${ev.isAI?'<span class="ai-badge">✨ AI生成</span>':''}</div>
+        <div class="event-cat-badge">${cat.lbl}${ev.isAI?'<span class="ai-badge">✨ AI生成</span>':''}</div>
         <div class="event-title-text">${esc(ev.title)}</div>
         <div class="event-desc-text" id="event-desc">${esc(ev.desc.slice(0,G.typedLen))}${G.isTyping?'<span class="cursor">▋</span>':''}</div>
       </div>
@@ -1646,8 +1678,10 @@ function renderAttrHud(at, crit){
   ]
   const chips=items.map(b=>`
     <div class="hud-item ${b.warn?'hud-warn':b.ok?'hud-ok':''}">
-      <div class="hud-name">${b.lbl}</div>
-      <div class="hud-val" style="color:${b.warn?'#c49898':b.ok?'#8ab09c':'var(--text-1)'}">${at[b.k]}</div>
+      <div class="hud-top-row">
+        <span class="hud-name">${b.lbl}</span>
+        <span class="hud-val">${at[b.k]}</span>
+      </div>
       <div class="hud-track"><div class="hud-fill ${b.cls}" style="width:${at[b.k]}%"></div></div>
     </div>`).join('')
   return`<div class="attr-hud">${chips}${crit?`<div class="critical-msg" style="flex-basis:100%;margin-top:0">${crit}</div>`:''}</div>`
@@ -1674,7 +1708,7 @@ function renderChoices(ev){
     ${ev.options.map((opt,i)=>{
       const sel=G.selectedIdx===i
       const dim=G.selectedIdx!==null&&G.selectedIdx!==i
-      const tags=Object.entries(opt.effect||{}).filter(([,v])=>v!==0).map(([k,v])=>`<span class="effect-tag ${v>0?'effect-pos':'effect-neg'}">${LABELS[k]||k} ${v>0?'+':''}${v}</span>`).join('')
+      const tags=Object.entries(opt.effect||{}).filter(([,v])=>v!==0).map(([k,v])=>`<span class="fx-tag">${LABELS[k]||k} <span class="${v>0?'fx-pos':'fx-neg'}">${v>0?'+':''}${v}</span></span>`).join('')
       return`<button class="choice-btn ${sel?'selected':''} ${dim?'dimmed':''}" data-a="choose" data-i="${i}">
         <div class="choice-num">${String.fromCharCode(65+i)}</div>
         <div class="choice-body">
@@ -1740,15 +1774,33 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 
 const ARK_MODEL = 'ep-20260224204235-qmfjh'
 
+// 生成或获取匿名用户ID
+function getOrCreateUserId() {
+  let uid = localStorage.getItem('qiuzhao_uid')
+  if (!uid) {
+    // 简单的UUID生成
+    uid = 'user_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9)
+    localStorage.setItem('qiuzhao_uid', uid)
+  }
+  return uid
+}
+
+// 在调用方舟API时带上用户ID
+const USER_ID = getOrCreateUserId()
+
 async function callArk(systemPrompt, userPrompt, opts = {}) {
   try {
     const controller = new AbortController()
     const tid = setTimeout(() => controller.abort(), opts.timeout ?? 9000)
     const resp = await fetch('/api/ark', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-User-Id': USER_ID // 发送给后端的请求头，用于追踪和限流
+      },
       body: JSON.stringify({
         model: ARK_MODEL,
+        user: USER_ID, // OpenAI/Ark 规范的user参数
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt   },
@@ -2030,7 +2082,7 @@ ${recentEvs}${prevChoiceBlock}
   1. 若努力值(effort)较高(>60)且到了10月后，可以发口头offer或面试通过等正向反馈。
   2. 若压力很高(stress>75)，可写崩溃时刻或父母打来电话等治愈系小确幸(light事件)。
   3. 若一切平平，则还原真实的秋招高压感或群面认识同好等社交事件。
-- effect范围±10~±30，必须包含 effort 属性的变化。
+- effect范围±10~±30，必须包含 effort 属性的变化（注意：努力值极难获取，增加幅度应在+2~+5，减少幅度可为-5~-15）。
 ${lastEventReq}
 
 JSON格式：
