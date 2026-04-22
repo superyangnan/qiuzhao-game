@@ -9,7 +9,7 @@ from socketserver import ThreadingMixIn
 import json, urllib.request, urllib.error, os, sys
 
 ARK_ENDPOINT = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
-ARK_KEY      = '73c3e19e-2bb9-4a8e-917a-b8e20b35879a'
+ARK_KEY      = os.environ.get('ARK_KEY')
 
 class Handler(SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args):
@@ -24,6 +24,13 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == '/api/ark':
+            if not ARK_KEY:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self._cors()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "API Key not configured. Please set ARK_KEY environment variable."}).encode('utf-8'))
+                return
             self._proxy_ark()
         else:
             self.send_error(404)

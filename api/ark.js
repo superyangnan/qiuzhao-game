@@ -15,8 +15,15 @@ export default async function handler(req) {
     const body = await req.json()
     const ARK_ENDPOINT = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
     
-    // 从环境变量获取 ARK_KEY，如果没有则使用写死的作为兜底（推荐在 Vercel 后台配置环境变量）
-    const ARK_KEY = process.env.ARK_KEY || '73c3e19e-2bb9-4a8e-917a-b8e20b35879a'
+    // 从环境变量获取 ARK_KEY
+    const ARK_KEY = process.env.ARK_KEY
+    
+    if (!ARK_KEY) {
+      return new Response(JSON.stringify({ error: 'API Key not configured. Please set ARK_KEY in environment variables.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
 
     // 将请求透传给方舟 API
     const response = await fetch(ARK_ENDPOINT, {
