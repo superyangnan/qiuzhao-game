@@ -8,6 +8,12 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import json, urllib.request, urllib.error, os, sys
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 ARK_ENDPOINT = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
 ARK_KEY      = os.environ.get('ARK_KEY')
 
