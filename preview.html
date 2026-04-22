@@ -1990,9 +1990,7 @@ JSON格式：{"story":"（正文）","quote":"（金句，15字以内）"}`
 }
 
 // ═══════════════════════════════════════════════
-// 单事件生成（每次选择后按上下文生成下一个）
-// ═══════════════════════════════════════════════
-
+// 单个事件生成（每次选择后按上下文生成下一个）
 async function generateSingleEvent(state, prevCtx) {
   const lb    = getPlayerLabels(state.player)
   const month = 8 + (state.chapter - 1)
@@ -2002,55 +2000,37 @@ async function generateSingleEvent(state, prevCtx) {
   const hasHighStress = state.attributes.stress >= 65
   const isOfferStage  = state.chapter >= 4
 
-  // 历史摘要（最近3条）
+  // 历史摘要：为了加速大模型推理，从保留最近3条缩减到只保留最近2条
   const history = state.eventHistory || G.eventHistory || []
-  const recentEvs = history.slice(-3)
-    .map(h => `「${h.event.title}」→ 选了「${h.event.options[h.choiceIdx]?.text || '未知'}」`).join('\n') || '无'
+  const recentEvs = history.slice(-2)
+    .map(h => `「${h.event.title}」→选了「${h.event.options[h.choiceIdx]?.text || '未知'}」`).join('\n') || '无'
 
-  // 上一个选择的直接上下文（最关键的连贯性信号）
+  // 上一个选择的直接上下文
   const prevChoiceBlock = prevCtx
-    ? `\n【上一个选择（必须影响本事件）】\n事件：「${prevCtx.eventTitle}」\n玩家选择：「${prevCtx.choiceText}」\n→ 请生成一个与这个选择有直接关联或自然延续的事件，让玩家感受到选择的后果。`
+    ? `\n[上一事件]：「${prevCtx.eventTitle}」\n[你的选择]：「${prevCtx.choiceText}」\n→生成一个与此选择有自然延续的事件。`
     : ''
 
-  // 最后一个事件的特殊要求（offer 终局）
   const isVeryLast = isLast && G.chapterEventsLeft === 0
-  const lastEventReq = isVeryLast ? `
-【终局事件要求】
-- 这是全游戏最后一个事件，必须是"offer 终极抉择"时刻
-- 详细描写两个性质不同的 offer 的纠结对比（如大厂 vs 公务员、高薪 vs 稳定）
-- 三个选项分别标记：unlockFlag:"offer_accepted" / unlockFlag:"has_offer_keep_going" / unlockFlag:"gave_up_qiuzhao"` : ''
+  const lastEventReq = isVeryLast ? `\n【终局要求】: 全游戏最后一个事件，必须是"offer终极抉择"。选项须带 unlockFlag:"offer_accepted"/"has_offer_keep_going"/"gave_up_qiuzhao"` : ''
 
-  const sys = '你是《人生简历》秋招模拟游戏的剧情引擎。严格输出单个事件的 JSON 对象，无任何额外文字或 markdown。'
-  const usr = `玩家档案：
-  学历：${lb.edu}，专业：${lb.major}，求职目标：${lb.jobs}，目标城市：${lb.cities}
-  本专业典型企业：${companies}
-
-当前：2024年${month}月 · ${cname}
-心理状态：信心${state.attributes.confidence} / 压力${state.attributes.stress} / 焦虑${state.attributes.anxiety} / 心气${state.attributes.morale} / 余额${state.attributes.money}
-近期经历：
+  const sys = '你是剧情引擎。严格输出单个JSON对象，不要Markdown格式，不带额外文字。'
+  const usr = `玩家：${lb.edu}，${lb.major}，目标${lb.jobs}在${lb.cities}，典型企业：${companies}
+当前：2024年${month}月。状态：信心${state.attributes.confidence}/压力${state.attributes.stress}/心气${state.attributes.morale}/余额${state.attributes.money}
+近期：
 ${recentEvs}${prevChoiceBlock}
 
-任务：生成 1 个秋招随机事件，要求：
-- 必须还原秋招真实高压感（拒信、已读不回、笔试超时、等通知等细节）
-- 使用具体公司名称增强代入感
-${hasHighStress ? '- 玩家压力很高，可写心态崩溃或意外转机的高戏剧性事件' : ''}
-${isOfferStage && !isVeryLast ? '- 可写口头 offer 或意向，让玩家感受"快有了"的焦灼感' : ''}
-- effect 数值范围 ±10~±30，坏事 stress/anxiety 至少 +15，好事 confidence/morale 至少 +15
+任务：生成1个秋招随机事件。
+- 还原秋招高压感（拒信/笔试/等通知），用具体公司名。
+${hasHighStress ? '- 玩家压力高，写崩溃或转机事件。' : ''}
+${isOfferStage && !isVeryLast ? '- 写口头offer或意向，体现焦灼感。' : ''}
+- effect范围±10~±30。
 ${lastEventReq}
 
-严格输出单个 JSON 对象（无其他任何文字）：
-{
-  "title": "（8字以内）",
-  "category": "stress|social|interview|light|turning",
-  "desc": "（80-130字，第二人称，口语化，有细节，有情绪张力）",
-  "options": [
-    {"text": "（15-30字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}},
-    {"text": "（15-30字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}},
-    {"text": "（15-30字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}}
-  ]
-}`
+JSON格式：
+{"title":"(8字内)","category":"stress|social|interview|light|turning","desc":"(80-120字，第二人称口语化)","options":[{"text":"(15字内)","effect":{"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}}]} (提供3个选项)`
 
-  const raw = await callArk(sys, usr, { maxTokens: 2500, timeout: 30000, temperature: 0.90 })
+  // 优化：降低 maxTokens 和 timeout，并稍微调低 temperature 让输出更稳定且快速
+  const raw = await callArk(sys, usr, { maxTokens: 400, timeout: 15000, temperature: 0.85 })
   if (!raw) return null
 
   try {
@@ -2362,10 +2342,11 @@ function startTyping(){
   if(!ev)return
   const len=ev.desc.length
   let cur=0
-  const spd=Math.max(15,Math.min(35,len/70))
+  // 优化：加快打字机效果的速度。字数越长打得越快，减少玩家看完内容还在等的情况
+  const spd=Math.max(8,Math.min(20,len/80))
   G.typingTimer=setInterval(()=>{
-    cur+=2
-    if(cur>=len){cur=len;clearInterval(G.typingTimer);G.isTyping=false;updateDesc();setTimeout(()=>{G.showOptions=true;render()},250);return}
+    cur+=3 // 每次多跳过几个字符，加快整体展现速度
+    if(cur>=len){cur=len;clearInterval(G.typingTimer);G.isTyping=false;updateDesc();setTimeout(()=>{G.showOptions=true;render()},150);return}
     G.typedLen=cur;updateDesc()
   },spd)
 }
@@ -2417,13 +2398,14 @@ function makeChoice(idx){
   },550)
 }
 
+// ── 章节过渡与静默预加载 ──
 function doChapterTransition(){
   const next = G.state.chapter + 1
   if (next > 5) { endGame(); return }
 
   G.state.chapter = next
   G.state.chapterProgress = 0
-  G.lastChoiceCtx = null  // 新章节不继承上章选择上下文
+  G.lastChoiceCtx = null
   G.chapterEventsLeft = ([0,3,4,4,3,3][next] || 3) - 1
 
   const overlay = document.createElement('div')
@@ -2441,17 +2423,19 @@ function doChapterTransition(){
     loadNext()
   }
 
+  // 优化：在动画开始时立刻触发 AI 生成，并行进行，掩盖网络延迟
   generateSingleEvent(G.state, null).then(ev => {
     firstEvent = ev || getFallbackEvent(next)
     tryProceed()
   })
 
+  // 优化：将动画阻断时间从 2200ms 缩短为 1500ms
   setTimeout(() => {
     overlay.remove()
     overlayDone = true
     if (firstEvent === null) { G.page='loading'; render() }
     tryProceed()
-  }, 2200)
+  }, 1500)
 }
 
 function endGame(){
