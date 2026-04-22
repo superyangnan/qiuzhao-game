@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"console.log\\(require\\('/Users/yangnan/llm/claude/qiuzhao-game/node_modules/webpack/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('/Users/yangnan/llm/claude/qiuzhao-game/node_modules/webpackbar/package.json'\\).version\\)\")",
+      "Bash(python3 -m http.server 8899)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node -e ' *)",
+      "Bash(pkill -f \"python3 server.py\")",
+      "Bash(pkill -f \"http.server 8899\")",
+      "Bash(python3 server.py)",
+      "Bash(curl -s http://localhost:8899/preview.html)",
+      "Bash(curl -s -X POST http://localhost:8899/api/ark -H 'Content-Type: application/json' -d '{\"model\":\"ep-20260224204235-qmfjh\",\"messages\":[{\"role\":\"user\",\"content\":\"用一句话回复：你好\"}],\"max_tokens\":30}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(pkill -f \"python3 -m http.server 8899\")",
+      "Bash(python3 -c ' *)",
+      "Bash(pkill -f \"server.py\")"
+    ]
+  }
+}

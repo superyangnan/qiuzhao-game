@@ -1,0 +1,234 @@
+.ending-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  background: #0a0a18;
+  z-index: 0;
+}
+
+.ending-scroll {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+}
+
+.ending-content {
+  padding: 0 0 80px;
+}
+
+// ─── 结局卡片 ────────────────────────────────────────
+.ending-card {
+  margin: 0 0 40px;
+  border-radius: 0 0 40px 40px;
+  padding: 60px 36px 50px;
+  padding-top: calc(60px + env(safe-area-inset-top, 44px));
+}
+
+.ending-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ending-rarity {
+  display: inline-block;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 6px 16px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.ending-title {
+  display: block;
+  font-size: 64px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 4px;
+  margin-bottom: 14px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ending-subtitle {
+  display: block;
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.ending-attrs {
+  display: flex;
+  gap: 24px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 16px;
+  padding: 20px 24px;
+}
+
+.ending-attr-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ending-attr-val {
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+}
+
+.ending-attr-key {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+// ─── 治愈文案 ────────────────────────────────────────
+.story-section {
+  padding: 0 36px;
+  margin-bottom: 48px;
+  min-height: 300px;
+}
+
+.generating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 0;
+}
+
+.generating-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  animation: float 2s ease infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.generating-text {
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.story-text {
+  display: block;
+  font-size: 30px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.gold-quote-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 48px;
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.gold-quote-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.gold-quote {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(255, 220, 100, 0.9);
+  text-align: center;
+  flex-shrink: 0;
+  max-width: 60%;
+  line-height: 1.5;
+}
+
+// ─── 经历回顾 ────────────────────────────────────────
+.replay-section {
+  padding: 0 36px;
+  margin-bottom: 48px;
+}
+
+.replay-title {
+  display: block;
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 24px;
+  letter-spacing: 2px;
+}
+
+.replay-item {
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.replay-event-name {
+  display: block;
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 6px;
+}
+
+.replay-choice {
+  display: block;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+// ─── 操作区 ────────────────────────────────────────
+.action-section {
+  padding: 0 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.btn-share {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 30px 0;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.35);
+
+  &:active { opacity: 0.85; transform: scale(0.98); }
+}
+
+.btn-share-text {
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.btn-restart {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 26px 0;
+  text-align: center;
+
+  &:active { opacity: 0.7; }
+}
+
+.btn-restart-text {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.6);
+}

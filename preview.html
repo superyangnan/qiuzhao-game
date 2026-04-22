@@ -1,0 +1,2502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人生简历 · 秋招模拟器</title>
+<style>
+:root {
+  --bg: #131210;
+  --bg-card: rgba(255,248,235,0.04);
+  --bg-card-hover: rgba(255,248,235,0.075);
+  --bg-selected: rgba(176,144,112,0.13);
+  --border: rgba(210,192,168,0.10);
+  --border-hover: rgba(210,192,168,0.22);
+  --border-selected: rgba(176,144,112,0.48);
+  --text-1: #ede8df;
+  --text-2: rgba(237,232,223,0.56);
+  --text-3: rgba(237,232,223,0.30);
+  --accent: #b09070;
+  --accent-2: #c8aa88;
+  --accent-glow: rgba(176,144,112,0.20);
+  --accent-btn: linear-gradient(135deg,#9e7e58 0%,#b8936a 50%,#c8a87c 100%);
+  --green: #7d9e8c;
+  --red: #c49898;
+  --amber: #c8a870;
+  --blue: #8aadbe;
+  --rose: #c49898;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 0 0 1px var(--border);
+  --shadow-card: 0 4px 32px rgba(0,0,0,0.40);
+  --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+
+body {
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: 'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── 环境光 ── */
+.ambient {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.ambient::before {
+  content:''; position:absolute;
+  width:900px;height:900px;
+  top:-250px;left:50%;transform:translateX(-50%);
+  background: radial-gradient(circle, rgba(176,144,112,0.09) 0%, transparent 68%);
+  border-radius: 50%;
+}
+.ambient::after {
+  content:''; position:absolute;
+  width:500px;height:500px;
+  bottom:-100px;right:-100px;
+  background: radial-gradient(circle, rgba(138,173,190,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* ── 页面容器 ── */
+#app {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── 页面过渡动画 ── */
+@keyframes pageIn {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.fade-in { animation: pageIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+/* ─────────────────────────────────
+   首页
+───────────────────────────────── */
+#page-index {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 100vh; padding: 80px 24px;
+  text-align: center;
+}
+
+.index-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(176,144,112,0.10);
+  border: 1px solid rgba(176,144,112,0.28);
+  border-radius: 100px; padding: 6px 16px;
+  font-size: 13px; color: var(--accent-2);
+  font-weight: 500; letter-spacing: 0.3px;
+  margin-bottom: 40px;
+}
+.badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 6px var(--accent);
+  animation: pulse-dot 2s ease infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+.index-title {
+  font-size: clamp(56px,8vw,96px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  background: linear-gradient(135deg,#ede8df 30%,rgba(200,170,136,0.95) 65%,rgba(158,126,88,0.85) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 20px;
+}
+.index-sub {
+  font-size: 22px; color: var(--text-2); margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+.index-desc {
+  font-size: 16px; color: var(--text-3); line-height: 1.8;
+  max-width: 400px; margin: 0 auto 64px;
+}
+
+.features-row {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  max-width: 640px; margin: 0 auto 64px;
+}
+.feat-chip {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 100px; padding: 10px 18px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--text-2);
+}
+.feat-chip-icon { font-size: 16px; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--accent-btn);
+  border: none; border-radius: 14px;
+  padding: 18px 40px; cursor: pointer;
+  font-size: 17px; font-weight: 600; color: #fff;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 24px rgba(158,126,88,0.30), 0 0 0 1px rgba(176,144,112,0.18);
+  transition: all var(--transition); text-decoration: none;
+  position: relative; overflow: hidden;
+}
+.btn-primary::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg,rgba(255,255,255,0.10),transparent);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(158,126,88,0.42),0 0 0 1px rgba(176,144,112,0.28); }
+.btn-primary:active { transform:translateY(0) scale(0.98); }
+.btn-arrow { font-size: 18px; transition: transform var(--transition); }
+.btn-primary:hover .btn-arrow { transform: translateX(4px); }
+
+.index-disclaimer {
+  margin-top: 32px; font-size: 12px; color: var(--text-3);
+}
+
+/* ─────────────────────────────────
+   创建角色
+───────────────────────────────── */
+#page-create {
+  max-width: 680px; margin: 0 auto;
+  padding: 60px 24px 120px;
+}
+
+.create-header { margin-bottom: 48px; }
+.create-step-label {
+  font-size: 12px; color: var(--accent-2); font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;
+  display: block;
+}
+.create-title {
+  font-size: clamp(28px,4vw,40px); font-weight: 700;
+  color: var(--text-1); line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+.create-hint {
+  font-size: 14px; color: var(--text-3); margin-top: 8px;
+}
+
+/* 进度条 */
+.step-track {
+  display: flex; gap: 6px; margin-bottom: 40px;
+}
+.step-seg {
+  height: 3px; flex: 1; border-radius: 2px;
+  background: var(--border); transition: background 0.4s ease;
+  overflow: hidden; position: relative;
+}
+.step-seg.done { background: rgba(176,144,112,0.55); }
+.step-seg.active { background: var(--border); }
+.step-seg.active::after {
+  content:''; position:absolute; inset:0;
+  background: var(--accent-btn);
+  animation: segFill 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes segFill { from{transform:scaleX(0);transform-origin:left} to{transform:scaleX(1)} }
+
+/* 选项列表 */
+.opt-list { display: flex; flex-direction: column; gap: 10px; }
+.opt-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap: 10px; }
+
+.opt-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; gap: 14px;
+  position: relative; overflow: hidden;
+}
+.opt-card::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(circle at 20% 50%, rgba(176,144,112,0.07), transparent 60%);
+  opacity:0; transition: opacity var(--transition);
+}
+.opt-card:hover { background:var(--bg-card-hover); border-color:var(--border-hover); transform:translateY(-1px); }
+.opt-card:hover::before { opacity:1; }
+.opt-card.selected {
+  background: var(--bg-selected); border-color: var(--border-selected);
+  box-shadow: 0 0 0 1px rgba(176,144,112,0.14), 0 4px 16px rgba(176,144,112,0.10);
+}
+.opt-card.selected::before { opacity:1; }
+.opt-card:active { transform: scale(0.99); }
+
+.opt-icon-wrap {
+  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; transition: all var(--transition);
+}
+.opt-card.selected .opt-icon-wrap {
+  background: rgba(176,144,112,0.15); border-color: rgba(176,144,112,0.32);
+}
+.opt-body { flex: 1; min-width: 0; }
+.opt-name { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.opt-desc { font-size: 12px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
+.opt-check {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: scale(0.6); transition: all var(--transition);
+  font-size: 11px; color: #fff; font-weight: 700;
+}
+.opt-card.selected .opt-check { opacity:1; transform:scale(1); }
+
+/* 网格卡片（专业选择） */
+.opt-tile {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 20px 12px;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.opt-tile:hover { background:var(--bg-card-hover); border-color:var(--border-hover); transform:translateY(-2px); }
+.opt-tile.selected { background:var(--bg-selected); border-color:var(--border-selected); }
+.opt-tile:active { transform: scale(0.97); }
+.opt-tile-icon { font-size: 28px; }
+.opt-tile-name { font-size: 12px; font-weight: 500; color: var(--text-2); line-height: 1.3; }
+.opt-tile.selected .opt-tile-name { color: var(--text-1); }
+
+/* 底部固定按钮栏 */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+  padding: 16px 24px 28px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
+  display: flex; gap: 12px; max-width: 680px; margin: 0 auto;
+}
+.bottom-nav-inner {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 680px;
+  padding: 12px 24px 28px;
+  background: linear-gradient(to top, var(--bg) 55%, transparent);
+  display: flex; gap: 12px;
+}
+.btn-back {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 20px;
+  font-size: 14px; color: var(--text-2); cursor: pointer;
+  transition: all var(--transition); white-space: nowrap;
+}
+.btn-back:hover { background:var(--bg-card-hover); border-color:var(--border-hover); color:var(--text-1); }
+.btn-next {
+  flex: 1; border-radius: 12px; padding: 14px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: all var(--transition); border: none;
+}
+.btn-next.enabled {
+  background: var(--accent-btn);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(158,126,88,0.28);
+}
+.btn-next.enabled:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(158,126,88,0.38); }
+.btn-next.enabled:active { transform:scale(0.99); }
+.btn-next.disabled {
+  background: rgba(255,255,255,0.05); color: var(--text-3); cursor: not-allowed;
+}
+.multi-hint {
+  font-size: 12px; color: var(--text-3); margin-top: 10px;
+  padding: 0 4px;
+}
+
+/* ─────────────────────────────────
+   游戏页
+───────────────────────────────── */
+#page-game { min-height: 100vh; }
+
+.game-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── 顶部属性 HUD（常驻） ── */
+.attr-hud {
+  grid-column: 1/-1;
+  display: flex; gap: 8px;
+  padding: 16px 0 24px;
+  flex-wrap: wrap;
+}
+.hud-item {
+  flex: 1; min-width: 80px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px 10px;
+  display: flex; flex-direction: column; gap: 7px;
+  transition: border-color var(--transition);
+}
+.hud-item.hud-warn { border-color: rgba(196,152,152,0.40); background: rgba(196,152,152,0.06); }
+.hud-item.hud-ok   { border-color: rgba(125,158,140,0.35); background: rgba(125,158,140,0.05); }
+.hud-name { font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: 0.6px; }
+.hud-val  { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+.hud-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.hud-fill  { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.hud-fill-conf   { background: linear-gradient(90deg,#b09070,#c8aa88); }
+.hud-fill-stress { background: linear-gradient(90deg,#c08080,#c49898); }
+.hud-fill-anx    { background: linear-gradient(90deg,#b89860,#c8a870); }
+.hud-fill-mor    { background: linear-gradient(90deg,#6e9680,#7d9e8c); }
+.hud-fill-money  { background: linear-gradient(90deg,#7a9dae,#8aadbe); }
+
+@media (max-width: 480px) {
+  .attr-hud { gap: 6px; }
+  .hud-item { padding: 10px 10px 8px; min-width: 56px; }
+  .hud-val  { font-size: 20px; }
+  .hud-name { font-size: 10px; }
+}
+
+/* 顶栏 */
+.game-topbar {
+  grid-column: 1/-1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 0 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.game-chapter {
+  display: flex; align-items: center; gap: 12px;
+}
+.chapter-pill {
+  background: rgba(176,144,112,0.10); border: 1px solid rgba(176,144,112,0.22);
+  border-radius: 100px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; color: var(--accent-2);
+  letter-spacing: 0.3px;
+}
+.chapter-title-text {
+  font-size: 15px; font-weight: 600; color: var(--text-1);
+}
+.progress-dots {
+  display: flex; gap: 5px; align-items: center;
+}
+.pdot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); transition: all 0.3s;
+}
+.pdot.done { background: rgba(176,144,112,0.55); }
+.pdot.cur { background: var(--accent); width:14px;border-radius:3px;box-shadow:0 0 6px rgba(176,144,112,0.5); }
+
+/* 主内容区 */
+.game-main { grid-column: 1; padding-bottom: 60px; }
+
+/* 事件卡 */
+.event-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 32px;
+  margin-bottom: 24px; cursor: text;
+  box-shadow: var(--shadow-card);
+}
+.event-cat-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 100px;
+  border: 1px solid; margin-bottom: 20px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+}
+.event-title-text {
+  font-size: 26px; font-weight: 700; color: var(--text-1);
+  line-height: 1.3; margin-bottom: 20px; letter-spacing: -0.3px;
+}
+.event-desc-text {
+  font-size: 15px; color: rgba(237,232,223,0.74);
+  line-height: 1.9; white-space: pre-wrap;
+}
+.cursor { display:inline-block; color:var(--accent); animation:cur-blink 0.9s step-end infinite; }
+@keyframes cur-blink { 0%,100%{opacity:1}50%{opacity:0} }
+
+/* 选项区 */
+.choices-wrap { animation: pageIn 0.35s ease; }
+.choices-label {
+  font-size: 11px; color: var(--text-3); letter-spacing: 2.5px;
+  text-transform: uppercase; margin-bottom: 14px; display: block;
+}
+.choice-btn {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 18px;
+  cursor: pointer; transition: all var(--transition);
+  margin-bottom: 10px; width: 100%; text-align: left;
+}
+.choice-btn:hover { background:var(--bg-card-hover); border-color:var(--border-hover); transform:translateX(2px); }
+.choice-btn.selected {
+  background:var(--bg-selected); border-color:var(--border-selected);
+  box-shadow: 0 0 0 1px rgba(176,144,112,0.12);
+}
+.choice-btn.dimmed { opacity: 0.35; pointer-events: none; }
+.choice-btn:active { transform:scale(0.99); }
+.choice-num {
+  width:24px; height:24px; border-radius:8px; flex-shrink:0;
+  background: rgba(255,255,255,0.06); border:1px solid var(--border);
+  font-size:12px; font-weight:700; color:var(--text-3);
+  display:flex;align-items:center;justify-content:center;
+  margin-top:1px; transition: all var(--transition);
+}
+.choice-btn.selected .choice-num { background:var(--accent); border-color:var(--accent); color:#fff; }
+.choice-body { flex:1; }
+.choice-text { font-size:15px; color:var(--text-1); line-height:1.6; }
+.choice-effects {
+  display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;
+}
+.effect-tag {
+  font-size:11px; padding:2px 8px; border-radius:6px;
+  font-weight:600; letter-spacing:0.2px;
+}
+.effect-pos { background:rgba(125,158,140,0.12); color:#8ab09c; border:1px solid rgba(125,158,140,0.22); }
+.effect-neg { background:rgba(196,152,152,0.10); color:#c49898; border:1px solid rgba(196,152,152,0.22); }
+
+/* 侧边属性栏（保留兼容类名） */
+.game-sidebar { display: none; }
+.attr-fill { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.fill-conf { background: linear-gradient(90deg,#b09070,#c8aa88); }
+.fill-stress { background: linear-gradient(90deg,#c08080,#c49898); }
+.fill-anx { background: linear-gradient(90deg,#b89860,#c8a870); }
+.fill-mor { background: linear-gradient(90deg,#6e9680,#7d9e8c); }
+.fill-money { background: linear-gradient(90deg,#7a9dae,#8aadbe); }
+
+.attr-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+.critical-msg {
+  font-size: 12px; color: #c49898; font-weight: 500;
+  padding: 10px 12px; background: rgba(196,152,152,0.07);
+  border: 1px solid rgba(196,152,152,0.15); border-radius: 10px;
+  margin-top: 14px; line-height: 1.5;
+}
+
+/* 章节过渡全屏 */
+.chapter-overlay {
+  position: fixed; inset:0; z-index:50;
+  background: var(--bg); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:12px;
+  animation: chapterAnim 2.2s ease forwards;
+  pointer-events: none;
+}
+@keyframes chapterAnim {
+  0%{opacity:0} 15%{opacity:1} 80%{opacity:1} 100%{opacity:0}
+}
+.ch-label { font-size:13px; color:var(--text-3); letter-spacing:4px; text-transform:uppercase; }
+.ch-title { font-size:48px; font-weight:800; letter-spacing:-1px; color:var(--text-1); }
+.ch-line { width:80px; height:1px; background: linear-gradient(90deg,transparent,rgba(200,170,136,0.6),transparent); margin-top:8px; }
+
+@media (max-width: 720px) {
+  .game-layout { padding: 0 16px; }
+  #page-create { padding: 40px 16px 100px; }
+}
+.attr-toggle-btn { display: none; }
+.mobile-attr-panel { display: none; }
+
+/* ─────────────────────────────────
+   结局页
+───────────────────────────────── */
+#page-ending { min-height: 100vh; }
+.ending-wrap {
+  max-width: 680px; margin: 0 auto; padding: 60px 24px 80px;
+}
+
+.ending-hero {
+  border-radius: 24px; padding: 40px 36px;
+  margin-bottom: 28px; position: relative; overflow: hidden;
+}
+.ending-hero::before {
+  content:''; position:absolute; inset:0;
+  background: rgba(0,0,0,0.15);
+}
+.ending-hero-content { position: relative; z-index: 1; }
+.ending-rarity-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.15); backdrop-filter:blur(8px);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 100px; padding: 5px 14px;
+  font-size: 12px; font-weight: 600; color: #fff;
+  margin-bottom: 20px;
+}
+.ending-main-title {
+  font-size: clamp(32px,5vw,48px); font-weight: 800;
+  color: #fff; line-height: 1.1; letter-spacing: -1px;
+  margin-bottom: 10px;
+}
+.ending-main-sub {
+  font-size: 15px; color: rgba(255,255,255,0.75);
+  line-height: 1.6; margin-bottom: 32px;
+}
+.ending-stats {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+}
+.stat-item {
+  background: rgba(255,255,255,0.12); backdrop-filter:blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px; padding: 14px 10px; text-align: center;
+}
+.stat-val { font-size: 24px; font-weight: 800; color: #fff; display:block; }
+.stat-key { font-size: 11px; color: rgba(255,255,255,0.6); margin-top:2px; display:block; }
+
+.story-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px 28px;
+  margin-bottom: 20px;
+}
+.story-body {
+  font-size: 15px; color: rgba(237,232,223,0.78);
+  line-height: 2; white-space: pre-wrap;
+}
+.gold-quote {
+  margin-top: 28px; padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 15px; color: var(--text-2);
+  font-style: italic; line-height: 1.8; text-align: center;
+}
+
+.replay-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 24px 28px; margin-bottom: 20px;
+}
+.replay-card-title {
+  font-size: 11px; font-weight: 600; color: var(--text-3);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px;
+}
+.replay-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.replay-item:last-child { border-bottom: none; padding-bottom: 0; }
+.replay-ev-name { font-size: 14px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; }
+.replay-choice { font-size: 12px; color: var(--text-3); }
+.replay-arrow { color: var(--accent-2); margin-right: 4px; }
+
+.ending-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.btn-secondary {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px; width: 100%;
+  font-size: 15px; color: var(--text-2); cursor: pointer;
+  transition: all var(--transition); text-align: center;
+}
+.btn-secondary:hover { background:var(--bg-card-hover); border-color:var(--border-hover); color:var(--text-1); }
+
+/* ── 通用工具 ── */
+.spinner {
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.15);
+  border-top-color:var(--accent-2);
+  animation:spin 0.7s linear infinite;
+  display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-state {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:300px;gap:14px;
+}
+.loading-text { font-size:14px;color:var(--text-3); }
+
+/* ─────────────────────────────────
+   开场动画
+───────────────────────────────── */
+#intro-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: #0e0d0b;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px; cursor: pointer;
+  overflow: hidden;
+}
+#intro-overlay::before {
+  content:''; position:absolute;
+  width:700px;height:700px;
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  background:radial-gradient(circle,rgba(176,144,112,0.09) 0%,transparent 68%);
+  border-radius:50%; pointer-events:none;
+  animation: introGlow 3s ease-in-out infinite alternate;
+}
+@keyframes introGlow { from{opacity:0.5;transform:translate(-50%,-60%) scale(1)} to{opacity:1;transform:translate(-50%,-60%) scale(1.15)} }
+.intro-label {
+  font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--accent-2); margin-bottom: 36px;
+  opacity: 0; animation: fadeInUp 0.7s 0.2s ease forwards;
+  position: relative; z-index: 1;
+}
+.intro-profile-wrap {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px 28px;
+  max-width: 460px; width: 100%;
+  opacity: 0; animation: fadeInUp 0.7s 0.6s ease forwards;
+  margin-bottom: 28px; position: relative; z-index: 1;
+}
+.intro-profile-header {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent-2); margin-bottom: 18px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.intro-profile-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-2); box-shadow: 0 0 6px var(--accent);
+  animation: pulse-dot 1.5s ease infinite;
+}
+.intro-profile-item {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.intro-profile-item:last-child { border-bottom: none; }
+.intro-profile-key { color: var(--text-3); font-size: 13px; }
+.intro-profile-val { color: var(--text-1); font-weight: 600; }
+.intro-narrative-wrap {
+  max-width: 460px; width: 100%;
+  opacity: 0; animation: fadeInUp 0.7s 1.1s ease forwards;
+  position: relative; z-index: 1;
+}
+.intro-narrative-text {
+  font-size: 16px; color: rgba(237,232,223,0.70);
+  line-height: 2.1; text-align: center; white-space: pre-line; min-height: 64px;
+}
+.intro-skip-hint {
+  position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; color: var(--text-3); letter-spacing: 1px;
+  opacity: 0; animation: fadeIn 0.8s 2.5s ease forwards; pointer-events: none;
+}
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* ─── AI事件徽章 ─── */
+.ai-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 9px; border-radius: 100px;
+  background: rgba(200,170,136,0.12); border: 1px solid rgba(200,170,136,0.28);
+  font-size: 11px; color: #c8aa88; font-weight: 600;
+  letter-spacing: 0.2px; margin-left: 8px; vertical-align: middle;
+}
+
+/* ─── 分享弹层 ─── */
+#share-modal {
+  position: fixed; inset: 0; z-index: 150;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px; animation: fadeIn 0.2s ease;
+}
+.share-modal-card {
+  background: #181510; border: 1px solid var(--border);
+  border-radius: 20px; padding: 24px;
+  max-width: 400px; width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+.share-modal-title { font-size:15px;font-weight:600;color:var(--text-1);margin-bottom:16px;text-align:center; }
+#share-canvas-preview { width:100%;border-radius:12px;display:block;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+.share-btn-row { display:flex;gap:10px; }
+.share-action-btn { flex:1;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all var(--transition);text-align:center; }
+.share-btn-primary { background:var(--accent-btn);color:#fff; }
+.share-btn-primary:hover { transform:translateY(-1px); }
+.share-btn-secondary { background:var(--bg-card);border:1px solid var(--border);color:var(--text-2); }
+.share-btn-secondary:hover { border-color:var(--border-hover);color:var(--text-1); }
+.share-close-btn { background:none;border:none;color:var(--text-3);cursor:pointer;font-size:13px;text-align:center;width:100%;margin-top:12px;padding:8px;transition:color var(--transition); }
+.share-close-btn:hover { color:var(--text-1); }
+.ai-ending-loading { display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 0; }
+.ai-ending-loading-text { font-size:14px;color:var(--text-3); }
+
+/* ─────────────────────────────────
+   开场数据动画
+───────────────────────────────── */
+#stats-intro {
+  position: fixed; inset: 0; z-index: 300;
+  background: #0d0c0a;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px; cursor: pointer;
+  overflow: hidden;
+}
+#stats-intro::before {
+  content: ''; position: absolute;
+  width: 800px; height: 800px;
+  top: 50%; left: 50%; transform: translate(-50%,-55%);
+  background: radial-gradient(circle, rgba(176,144,112,0.07) 0%, transparent 65%);
+  border-radius: 50%; pointer-events: none;
+  animation: statsGlow 4s ease-in-out infinite alternate;
+}
+@keyframes statsGlow {
+  from { opacity:0.5; transform:translate(-50%,-55%) scale(1); }
+  to   { opacity:1;   transform:translate(-50%,-55%) scale(1.12); }
+}
+.stats-year-label {
+  font-size: 12px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 28px;
+  opacity: 0; animation: fadeInUp 0.6s 0.1s ease forwards;
+  position: relative; z-index: 1;
+}
+.stats-counter-wrap {
+  text-align: center; margin-bottom: 10px;
+  opacity: 0; animation: fadeInUp 0.7s 0.3s ease forwards;
+  position: relative; z-index: 1;
+}
+.stats-big-num {
+  font-size: clamp(72px, 12vw, 120px);
+  font-weight: 800; letter-spacing: -3px; line-height: 1;
+  background: linear-gradient(135deg, #ede8df 20%, #c8aa88 60%, #b09070 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stats-big-unit {
+  font-size: clamp(28px, 4vw, 42px); font-weight: 700;
+  color: var(--accent-2); margin-left: 6px;
+}
+.stats-big-sub {
+  font-size: 16px; color: var(--text-2); margin-top: 10px;
+  letter-spacing: 0.5px;
+}
+.stats-divider {
+  width: 48px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(176,144,112,0.45), transparent);
+  margin: 32px auto;
+  opacity: 0; animation: fadeIn 0.5s 1.0s ease forwards;
+  position: relative; z-index: 1;
+}
+.stats-grid {
+  display: flex; gap: clamp(24px,4vw,56px); justify-content: center;
+  flex-wrap: wrap; max-width: 580px;
+  position: relative; z-index: 1;
+}
+.stats-item {
+  text-align: center; opacity: 0;
+}
+.stats-item:nth-child(1) { animation: fadeInUp 0.55s 1.2s ease forwards; }
+.stats-item:nth-child(2) { animation: fadeInUp 0.55s 1.55s ease forwards; }
+.stats-item:nth-child(3) { animation: fadeInUp 0.55s 1.90s ease forwards; }
+.stats-item-num {
+  font-size: clamp(28px, 4vw, 40px); font-weight: 700;
+  color: var(--text-1); letter-spacing: -0.5px;
+}
+.stats-item-key {
+  font-size: 13px; color: var(--text-3); margin-top: 4px; letter-spacing: 0.3px;
+}
+.stats-closing {
+  margin-top: 44px; font-size: clamp(14px,2vw,18px);
+  color: var(--text-2); letter-spacing: 0.5px; line-height: 1.9;
+  text-align: center; max-width: 400px;
+  opacity: 0; animation: fadeInUp 0.7s 2.5s ease forwards;
+  position: relative; z-index: 1;
+}
+.stats-closing em {
+  font-style: normal; color: var(--accent-2);
+  font-weight: 600;
+}
+.stats-skip {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; color: var(--text-3); letter-spacing: 1px;
+  opacity: 0; animation: fadeIn 0.6s 3.2s ease forwards; pointer-events: none;
+  z-index: 1;
+}
+
+/* ─────────────────────────────────
+   简历展示页
+───────────────────────────────── */
+#page-resume {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 48px 24px 120px;
+}
+.resume-header-label {
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent-2); margin-bottom: 10px;
+}
+.resume-sub-label {
+  font-size: 14px; color: var(--text-3); margin-bottom: 32px; text-align: center;
+}
+.resume-card {
+  width: 100%; max-width: 580px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.resume-top {
+  display: flex; align-items: center; gap: 16px;
+  padding: 24px 24px 20px;
+  background: rgba(176,144,112,0.06);
+  border-bottom: 1px solid var(--border);
+}
+.resume-avatar {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  background: var(--accent-btn); display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: #fff;
+}
+.resume-basic { flex: 1; min-width: 0; }
+.resume-name { font-size: 17px; font-weight: 700; color: var(--text-1); }
+.resume-meta { font-size: 13px; color: var(--text-3); margin-top: 3px; }
+.resume-tier-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 4px 10px; border-radius: 8px; flex-shrink: 0;
+  border: 1px solid var(--border-selected); color: var(--accent-2);
+  background: var(--bg-selected);
+}
+.resume-section { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+.resume-section:last-child { border-bottom: none; }
+.resume-section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 10px;
+}
+.resume-edu-school { font-size: 14px; font-weight: 600; color: var(--text-1); }
+.resume-edu-detail { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+.resume-intent { font-size: 14px; color: var(--text-2); line-height: 1.7; }
+.resume-exp-item { margin-bottom: 12px; }
+.resume-exp-item:last-child { margin-bottom: 0; }
+.resume-exp-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
+.resume-exp-role { font-size: 12px; color: var(--accent-2); font-weight: 500; margin: 2px 0; }
+.resume-exp-detail { font-size: 12px; color: var(--text-3); line-height: 1.6; }
+.resume-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+.resume-skill-tag {
+  font-size: 12px; color: var(--text-2); padding: 4px 10px;
+  background: rgba(255,248,235,0.05); border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.resume-score-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 24px 20px;
+  background: rgba(176,144,112,0.04);
+}
+.resume-score-label { font-size: 12px; color: var(--text-3); flex-shrink: 0; }
+.resume-score-bar {
+  flex: 1; height: 6px; background: rgba(255,248,235,0.07);
+  border-radius: 3px; overflow: hidden;
+}
+.resume-score-fill {
+  height: 100%; border-radius: 3px;
+  background: var(--accent-btn);
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.resume-score-num { font-size: 16px; font-weight: 700; color: var(--accent-2); flex-shrink: 0; }
+.resume-score-note { font-size: 11px; color: var(--text-3); padding: 0 24px 16px; line-height: 1.5; }
+.resume-bottom-nav {
+  width: 100%; max-width: 580px; margin-top: 28px; text-align: center;
+}
+.resume-disclaimer { font-size: 12px; color: var(--text-3); margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// 数据
+// ═══════════════════════════════════════════════
+
+const EDU_OPTIONS = [
+  { value:'college',          label:'专科/高职',        desc:'解锁逆袭事件链',         icon:'🎓', tier:'D' },
+  { value:'bachelor_normal',  label:'普通本科',          desc:'双非院校',               icon:'📘', tier:'C' },
+  { value:'bachelor_211',     label:'211本科',           desc:'重点高校',               icon:'📗', tier:'B' },
+  { value:'bachelor_985',     label:'985本科',           desc:'解锁光环压力事件',       icon:'📕', tier:'A' },
+  { value:'master_normal',    label:'双非一本研究生',    desc:'专硕/学硕，双非背景',    icon:'🔬', tier:'C' },
+  { value:'master_211',       label:'211研究生',         desc:'重点高校读研',           icon:'🔭', tier:'B' },
+  { value:'master_985',       label:'985研究生',         desc:'顶校研究生压力更大',     icon:'🧪', tier:'A' },
+  { value:'phd',              label:'博士研究生',        desc:'选择极窄，分化剧烈',     icon:'⚗️', tier:'A' },
+]
+
+const MAJOR_OPTIONS = [
+  { value:'cs',           label:'计算机/软件', icon:'💻' },
+  { value:'electronics',  label:'电子/通信',   icon:'📡' },
+  { value:'civil',        label:'土木/建筑',   icon:'🏗️' },
+  { value:'biology',      label:'生物/化学',   icon:'🧬' },
+  { value:'math',         label:'数学/统计',   icon:'📐' },
+  { value:'finance',      label:'金融/经济',   icon:'💰' },
+  { value:'accounting',   label:'会计/审计',   icon:'📊' },
+  { value:'business',     label:'工商/市场',   icon:'📈' },
+  { value:'trade',        label:'国际贸易',    icon:'🌐' },
+  { value:'law',          label:'法学',        icon:'⚖️' },
+  { value:'chinese',      label:'中文/新闻',   icon:'✒️' },
+  { value:'history',      label:'历史/哲学',   icon:'📜' },
+  { value:'foreign_lang', label:'外语类',      icon:'🗣️' },
+  { value:'medicine',     label:'临床医学',    icon:'🏥' },
+  { value:'nursing',      label:'护理/公卫',   icon:'💊' },
+]
+
+const JOB_TARGET_OPTIONS = [
+  { value:'big_tech',      label:'互联网大厂',  desc:'高风险高收益',       icon:'🚀' },
+  { value:'state_owned',   label:'国有企业',    desc:'稳定导向',           icon:'🏛️' },
+  { value:'foreign',       label:'外资企业',    desc:'竞争激烈，流程漫长', icon:'🌍' },
+  { value:'civil_servant', label:'考公务员',    desc:'独立支线，成功率低', icon:'📋' },
+  { value:'postgrad',      label:'考研二战',    desc:'放弃秋招，极高风险', icon:'📚' },
+  { value:'explore',       label:'自由探索',    desc:'随机性最高',         icon:'🎲' },
+]
+
+const CITY_OPTIONS = [
+  { value:'tier1',     label:'北上广深',    desc:'机会最多，压力也最强',    icon:'🏙️' },
+  { value:'new_tier1', label:'新一线城市',  desc:'杭州/成都/武汉/南京等',   icon:'🌆' },
+  { value:'tier2',     label:'二线城市',    desc:'竞争适中，生活成本低',    icon:'🏘️' },
+  { value:'hometown',  label:'回到家乡',    desc:'解锁家乡专属事件链',      icon:'🏡' },
+]
+
+const BACKGROUND_OPTIONS = [
+  { value:'big_tech_intern',    label:'有大厂实习经历',    icon:'⭐' },
+  { value:'research_paper',     label:'有科研/论文发表',   icon:'📄' },
+  { value:'startup',            label:'有创业/副业经历',   icon:'💡' },
+  { value:'student_leader',     label:'学生干部/社团核心', icon:'🎖️' },
+  { value:'competition_award',  label:'竞赛获奖',          icon:'🏆' },
+  { value:'family_connections', label:'家庭有资源/关系',   icon:'🤝' },
+  { value:'financial_pressure', label:'家庭经济压力大',    icon:'💸' },
+  { value:'cross_major',        label:'跨专业求职',        icon:'🔀' },
+]
+
+const CHAPTER_NAMES  = {1:'8月·内推季',2:'9月·海投期',3:'10月·高峰期',4:'11月·等待期',5:'12月·收尾期'}
+const CHAPTER_MONTHS = {1:'2024年8月',2:'2024年9月',3:'2024年10月',4:'2024年11月',5:'2024年12月'}
+
+// 各专业对应典型招聘企业，注入 AI prompt 提升个性化
+const MAJOR_COMPANIES = {
+  cs:          '字节跳动、腾讯、阿里、美团、百度、华为、网易、滴滴、小米、京东',
+  electronics: '华为、中兴、大疆、小米、OPPO、vivo、联发科、海康威视、格力',
+  civil:       '中建集团、中铁建、万科、碧桂园、保利发展、中铁、中冶、华润置地',
+  biology:     '恒瑞医药、药明康德、华大基因、百济神州、迈瑞医疗、先声药业、国药集团',
+  math:        '中信证券、中金公司、国泰君安、量化私募基金、蚂蚁集团、头部对冲基金',
+  finance:     '中信证券、中金公司、招商银行、工行、平安保险、高盛、摩根大通、交行',
+  accounting:  '普华永道、德勤、安永、毕马威、中信证券、招商银行、国内上市公司财务',
+  business:    '宝洁、联合利华、阿里巴巴、京东、美团、滴滴、华润、中粮、麦肯锡',
+  trade:       '中粮集团、华为海外、中远海运、中化国际、外资进出口贸易公司',
+  law:         '中伦律所、金杜律所、君合律所、竞天公诚、国企法务部、互联网公司法务',
+  chinese:     '字节系媒体、腾讯新闻、人民日报数字端、新华社、各大内容平台运营',
+  history:     '高校科研院所、故宫博物院、国家图书馆、政府文旅部门、出版社编辑',
+  foreign_lang:'外资企业、新华社国际部、外交部、翻译公司、跨国企业区域运营',
+  medicine:    '北京协和医院、华西医院、瑞金医院、药企临床事务部、医疗器械公司',
+  nursing:     '三甲医院护理岗、社区卫生服务中心、私立医院、养老机构',
+}
+
+const CAT_STYLE = {
+  stress:    {bg:'rgba(196,152,152,.10)', bd:'rgba(196,152,152,.24)', txt:'#c49898',  lbl:'压力'},
+  social:    {bg:'rgba(138,173,190,.10)', bd:'rgba(138,173,190,.24)', txt:'#8aadbe',  lbl:'社交'},
+  interview: {bg:'rgba(176,144,112,.10)', bd:'rgba(176,144,112,.26)', txt:'#b09070',  lbl:'面试'},
+  light:     {bg:'rgba(125,158,140,.10)', bd:'rgba(125,158,140,.24)', txt:'#7d9e8c',  lbl:'转机'},
+  turning:   {bg:'rgba(200,168,112,.10)', bd:'rgba(200,168,112,.24)', txt:'#c8a870',  lbl:'抉择'},
+  random:    {bg:'rgba(168,148,118,.10)', bd:'rgba(168,148,118,.24)', txt:'#a89476',  lbl:'随机'},
+}
+
+const ENDINGS_DATA = {
+  A1:{title:'人生赢家',      sub:'你站在了大多数人仰望的地方',              rarity:'rare',     grad:'linear-gradient(135deg,#b8966a,#c8a070,#d4b07a)', quote:'你到了，但路还长，走好。'},
+  A2:{title:'甜蜜的烦恼',    sub:'两个大offer，这种困扰很多人一生都遇不到',rarity:'rare',     grad:'linear-gradient(135deg,#b8966a,#c8a878,#ceb47a)', quote:'每一个好的选择，都值得被认真对待。'},
+  B1:{title:'刚刚好',        sub:'不是最闪亮的，但这就是你的位置',          rarity:'common',   grad:'linear-gradient(135deg,#6e7e9e,#8a9ebe,#9aaecc)', quote:'平稳落地，也是一种勇气。'},
+  B2:{title:'回家也不错',    sub:'有些人的终点，是别人出发的地方',          rarity:'common',   grad:'linear-gradient(135deg,#a08868,#b09070,#c8a878)', quote:'选择慢一点的生活，需要比别人更多的勇气。'},
+  B3:{title:'铁饭碗',        sub:'稳定，是另一种可能',                      rarity:'uncommon', grad:'linear-gradient(135deg,#8a9e8e,#7d9e8c,#6e9680)', quote:'稳定，不是平庸，是一种选择的结果。'},
+  C1:{title:'二战吧',        sub:'你把今年的失败，变成了明年的弹药',        rarity:'common',   grad:'linear-gradient(135deg,#9e8898,#b89aaA,#c8aaaa)', quote:'今年的代价，是明年的底气。'},
+  C2:{title:'弯路也是路',    sub:'你走了一段弯路，才找到了正路',            rarity:'uncommon', grad:'linear-gradient(135deg,#7a8aae,#8a9abe,#9aaece)', quote:'不走弯路的人，不知道直路的珍贵。'},
+  C3:{title:'跳台',          sub:'这不是终点，只是一个起跳点',              rarity:'common',   grad:'linear-gradient(135deg,#7a8aae,#8a9abe,#9aaece)', quote:'先落地，再起飞，顺序不重要，方向重要。'},
+  C4:{title:'逆袭传说',      sub:'他们划定的边界，你一脚踢开了',            rarity:'secret',   grad:'linear-gradient(135deg,#b06878,#c08888,#c8989a)', quote:'他们用学历画的圆，关不住你。'},
+  D1:{title:'Gap Year宣言',  sub:'你给了自己一段时间，来好好听自己说话',    rarity:'uncommon', grad:'linear-gradient(135deg,#a09070,#b8a078,#c8b080)', quote:'停下来，不是放弃，是为了走得更远。'},
+  D2:{title:'造工作的人',    sub:'别人在找工作，你在造工作',                rarity:'secret',   grad:'linear-gradient(135deg,#a87868,#b88878,#c89888)', quote:'有的人找工作，有的人造工作，都是勇气。'},
+  E1:{title:'崩溃与重建',    sub:'你崩溃过，然后重新站了起来，这就够了',   rarity:'rare',     grad:'linear-gradient(135deg,#987888,#a88898,#b898a8)', quote:'崩溃过的人，重建起来的东西更结实。'},
+  E2:{title:'什么都没得到，但我还是我', sub:'你完整地经历了一次失败，还完整地走出来了', rarity:'rare', grad:'linear-gradient(135deg,#6e7e9e,#7e8eae,#8e9ebe)', quote:'没有拿到offer，不等于你什么都没得到。'},
+  E3:{title:'平静经过',      sub:'你没有特别拼，也没有特别惨，你只是经历了',rarity:'uncommon', grad:'linear-gradient(135deg,#788898,#88989e,#98a8b0)', quote:'平静经过，也是一种完成。'},
+  E4:{title:'还在路上',      sub:'有些人的秋招，叫做整个青春',              rarity:'secret',   grad:'linear-gradient(135deg,#9e8e60,#b09868,#c0aa78)', quote:'有些路，走慢一点，才能看清楚方向。'},
+  // ── 戏剧性结局 ──
+  X1:{title:'你好好休息吧',  sub:'身体先于你崩溃了，这不是失败，是保护',   rarity:'secret',   grad:'linear-gradient(135deg,#7a6868,#9a8888,#b09898)', quote:'先活着，再谈工作，顺序错不了。'},
+  X2:{title:'世界那么大',    sub:'没有offer，但你买了一张没有终点的车票',  rarity:'secret',   grad:'linear-gradient(135deg,#6e8878,#7d9e8c,#8aae9c)', quote:'不是逃跑，是充电——你终究会回来的。'},
+  X3:{title:'先躺为敬',      sub:'你决定让这届自己先休息一下再说',          rarity:'uncommon', grad:'linear-gradient(135deg,#7a8898,#88969e,#96a8b0)', quote:'躺平不是终点，是你重新出发前的呼吸。'},
+  X4:{title:'论文没过，再等一年', sub:'命运说：你需要再沉淀一下',          rarity:'uncommon', grad:'linear-gradient(135deg,#887868,#9a8878,#a89888)', quote:'今年的代价，是明年更扎实的底气。'},
+  O2:{title:'委屈上岸',      sub:'这不是你要的那个offer，但先落地',        rarity:'common',   grad:'linear-gradient(135deg,#788898,#8898a8,#98a8b8)', quote:'先站到地上，再看从哪里起飞。'},
+}
+
+const ENDING_STORIES = {
+  A1:`你走进了秋招这场考场，那段奋战到深夜的时间如今想起来仍历历在目。\n\n顶级offer躺在邮箱里。数字是真实的，工牌是真实的，第一天上班时那种轻微的不真实感，也是真实的。\n\n站在这个位置上，会有一点孤独。你在人群里，却不一定找得到能分享这份感受的人。那没关系。\n\n真正的赢不是别人看你的眼神，是你知道自己为什么在这里。`,
+  A2:`你面对的不是没有offer，而是两个都不想放弃的offer。\n\n其实做这个选择本身，就已经是一种答案了。你在秋招里跑赢了很多人，这不是偶然——是你那些不被看见的努力堆出来的。\n\n不管你最终选了哪个，都不会是错的。`,
+  B1:`不是顶流的大厂，不是让朋友圈惊叫的名字，但这份offer，是你实实在在打出来的。\n\n最难的时候你没有放弃，低谷的时候你也挺过来了。这一路不算光鲜，但每一步都是你自己走的。\n\n这份工作，会是你的起点。什么时候出发，完全由你决定。`,
+  B2:`你最终选择了回家。\n\n这个决定，可能有人不理解，可能你自己偶尔也会问一句"要不要再拼一把"。\n\n但那条街你从小走过，那些人说的话里有你熟悉的口音。慢一点，不是落后。离家近，不是失败。`,
+  B3:`你考上了。\n\n备考的那段时间，你放弃了很多，刷了无数真题，背了无数框架。很多人说考公没意思，但你知道自己为什么选这条路。\n\n铁饭碗里装的不一定是安逸，有时候是一种叫做"确定性"的东西——在这个时代，确定性本身就很贵。`,
+  C1:`这一年的秋招，你没有拿到满意的结果。\n\n说没关系是假的，你也不需要假装没关系。压力最大的那段时间，那是真实存在过的感受。\n\n但你选择了再来一次。这不是因为你不服气，而是因为你还没准备好放弃。失败是真实的，但它不是终点。`,
+  C2:`当初填报志愿，你大概没想到今天会做这份工作。跨专业求职，每投一次简历都需要多解释一段自己的逻辑。\n\n但你撑下来了，而且在这个过程中，你比很多人更清楚自己到底想要什么。`,
+  C3:`拿到这份offer的时候，你可能有点不甘心。薪资不如预期，公司不是心仪的那个。\n\n但你没有放弃，你选择先站到地上，再想办法往高处走。跳台不是终点，而是你起跳的地方。`,
+  C4:`他们说你的学历进不了这种公司。\n\n你投了，过了，面了，拿了。\n\n这条路上你比别人多绕了多少圈，多被刷了多少次简历，你心里比任何人都清楚。但你到了。`,
+  D1:`你没有在这个秋天找到工作，但你做了一个也许更难的决定：先停下来。\n\n不是逃跑，是暂停。给自己一段时间，在全力冲刺之前，先弄清楚自己要跑向哪里。去听听你自己的声音吧。`,
+  D2:`你没有去投递别人的招聘简历，你选择了另一条路。凌晨三点还亮着的屏幕，是那种不知道何时是头的不确定感。\n\n但也有一种东西，是在别处找不到的：那是属于你的事。`,
+  E1:`你崩溃过。不是轻描淡写的"有点累"，而是真实地撑不住了。\n\n那种时候，很多人选择假装自己还好。你也可能假装过。但你还是撑下来了，一天一天地，走到了今天。\n\n拿到这个offer的你，和刚开始秋招的你，已经不是同一个人了。`,
+  E2:`这个秋天，你没有拿到offer。\n\n但有一件事值得你记住：你经历了整个秋招，所有的笔试、拒信、面试、沉默——你全部经历了，而且你完整地走出来了。这一年，你没有在最难的地方倒下。这不是小事。真的不是。`,
+  E3:`你的秋招，不是一个激烈的故事。没有戏剧性的逆转，也没有彻底的低谷。就是一步一步地走，一封一封地等，一次一次地继续。\n\n能平静地经历一件本来很焦虑的事情，是一种了不起的能力。`,
+  E4:`秋招结束了，你的路还没有结束。你还在找。这不是什么丢人的事，这只是你的节奏比别人慢了一点——而"慢"，不是"错"。\n\n走慢一点没关系，迷路了可以问路，累了可以停一停。但别停太久——你值得找到那个地方。`,
+  X1:`那段时间，你的身体先于你做出了判断。\n\n某一天，你坐在椅子上什么也做不了。胸腔里有什么东西在一点点压下来，脑子里是所有还没回音的公司、还没做完的题，以及那个模糊的、越来越近的毕业。\n\n医生说是焦虑症合并睡眠障碍。你说，是的，我知道。\n\n住院的那些天，没有简历，没有笔试，没有已读不回的HR。你第一次在这场秋招里睡了一个完整的觉。\n\n出院那天，秋招已经结束了。你拿着出院证明站在医院门口，阳光出乎意料地好。\n\n你告诉自己：先活着，再谈工作。这个顺序，很重要。`,
+  X2:`offer没了，你却觉得轻了一点。\n\n这个决定没有人支持。爸妈打来电话，朋友说你太任性，秋招群里有人说"你这是逃跑"。\n\n你把手机关掉，买了一张不知道去哪儿的车票。\n\n后来你在某个陌生的地方，对着傍晚的天空，突然想明白了一件事：原来这个世界上不是只有offer和简历的。\n\n这段旅途花了多少钱，你不想算。值不值得，你觉得不是用钱衡量的那种事。\n\n等你准备好了，你会回来的。那时候你会带着别人没有的东西回来。`,
+  X3:`你不是不想努力。\n\n你努力过，投过几百份简历，做过几十套笔试，被拒了一遍又一遍。某一天，你意识到自己已经三天没有打开招聘软件了。\n\n不是不想投，是不知道还能投什么了。\n\n你把电脑关上，把APP删掉，给自己泡了杯茶，坐在窗边晒了两个小时太阳。你没有崩溃，你只是停下来了。\n\n先躺一段时间也没关系。躺平不是放弃，是你的一种权利。等你想重新出发的那天，路还在那里。而那时候的你，可能比现在想得更清楚。`,
+  X4:`你没想到拦住你的不是HR，而是答辩委员会。\n\n论文被退回来的那天，外面正在下雨。你坐在办公室里，盯着导师发来的修改意见，看了很久，没有说话。\n\n同学们已经陆续开始上班了，有人发了入职打卡，有人在群里说"终于上岸了"。你收到一条消息："怎么还没毕业啊你？"\n\n你没有回。\n\n明年还有机会的。今年你学到了很多——关于研究，关于坚持，关于"有时候努力不够用，但方向可以调整"。\n\n这一年不是白费的。等你真的站上那个答辩台，你会知道这一年在哪里。`,
+  O2:`拿到offer的那天，你坐在那里，表情很奇怪。\n\n不是很开心——这家公司不是你想去的，薪资低了一档，城市也不是最理想的那个。但你还是点了确认。\n\n有时候"先落地"是一种选择，而不是妥协。你知道这份工作不是终点，而是一个起点——一个不够完美，但真实存在的起点。\n\n你给自己定了一个期限：两年，认真做，积累经验，然后再看下一步。\n\n所有人都说"先上岸"。现在你上了。接下来怎么走，由你来定。`,
+}
+
+// ── 固定事件 ──
+const FIXED_EVENTS = [
+  {id:'F-001',type:'fixed',category:'social',chapter:1,title:'朋友圈内推轰炸',
+   desc:'八月初，你的手机开始震个不停。秋招群、同学群、师兄师姐群……到处都是"字节内推码来了！""腾讯名额有限，手速快的上！"\n\n你看着屏幕，深呼一口气。秋招，真的开始了。',
+   options:[
+     {id:'F-001-A',text:'广撒网，先投一百家',effect:{anxiety:10,morale:5,money:-5},unlockFlag:'strategy_scatter'},
+     {id:'F-001-B',text:'精准出击，只投心仪的十家',effect:{confidence:5,anxiety:5},unlockFlag:'strategy_precise'},
+     {id:'F-001-C',text:'先把题刷完再说',effect:{stress:8,morale:3},unlockFlag:'strategy_study'},
+     {id:'F-001-D',text:'再等等，时间还早',effect:{anxiety:-5,morale:-5},unlockFlag:'strategy_wait'},
+   ],isOneShot:true},
+  {id:'F-002',type:'fixed',category:'stress',chapter:1,title:'简历初稿危机',
+   desc:'你打开简历，盯着那份一年没更新的Word文档沉默了三分钟。\n\n教育经历、实习经历、项目经历……怎么感觉每一行都在暴露自己的不足？\n\n"要不要找人帮我改一改？"',
+   options:[
+     {id:'F-002-A',text:'付费找专业机构修改（-20金钱）',effect:{confidence:10,money:-20},unlockFlag:'resume_paid'},
+     {id:'F-002-B',text:'求师兄师姐帮忙看看',effect:{confidence:8,morale:5},unlockFlag:'resume_referral'},
+     {id:'F-002-C',text:'自己改，相信自己',effect:{confidence:5,stress:5},unlockFlag:'resume_self'},
+   ],isOneShot:true},
+  {id:'F-003',type:'fixed',category:'social',chapter:1,title:'秋招群建立',
+   desc:'你被拉进了一个叫"2025届秋招互助群"的微信群。\n\n里面三百个人，每天从早到晚都有消息。有人分享笔试题，有人晒offer，有人在问"被HR挂了正常吗"……\n\n你把这个群设成了免打扰，然后内心五味杂陈。',
+   options:[
+     {id:'F-003-A',text:'认真看每一条消息，吸收情报',effect:{anxiety:15,confidence:5}},
+     {id:'F-003-B',text:'只看笔经/面经，屏蔽噪音',effect:{stress:5,confidence:3}},
+     {id:'F-003-C',text:'直接免打扰，眼不见心不烦',effect:{anxiety:-5,morale:3}},
+   ],isOneShot:true},
+  {id:'F-010',type:'fixed',category:'stress',chapter:2,title:'第一封拒信',
+   desc:'你投出去的第五封简历，今天有了回音。\n\n"感谢您投递XX公司，经综合评估，您的简历与岗位要求不匹配……"\n\n你盯着这封模板邮件看了很久，手机屏幕亮了又暗。\n\n第一次，就这样。',
+   options:[
+     {id:'F-010-A',text:'没事的，这才第一封，继续投',effect:{confidence:-5,morale:5}},
+     {id:'F-010-B',text:'去刷了会儿手机，假装没看见',effect:{anxiety:8,stress:5}},
+     {id:'F-010-C',text:'认真反思简历哪里出了问题',effect:{confidence:3,stress:10,morale:3},unlockFlag:'resume_reflect'},
+   ],isOneShot:true},
+  {id:'F-011',type:'fixed',category:'light',chapter:2,title:'第一封笔试邀请',
+   desc:'终于！\n\n邮件通知：您已通过简历筛选，请于本周六完成在线笔试，时长120分钟……\n\n你把消息转发给家人，看到妈妈回了个"加油！"和五个大拇指表情包。',
+   options:[
+     {id:'F-011-A',text:'认真备考，刷历年题',effect:{confidence:8,stress:15,morale:10},unlockFlag:'first_test_prepared'},
+     {id:'F-011-B',text:'随缘，看看水平怎么样',effect:{confidence:5,morale:12,stress:5}},
+   ],isOneShot:true},
+  {id:'F-012',type:'fixed',category:'social',chapter:2,title:'国庆节：回家被催',
+   desc:'难得的假期，你回了家。\n\n饭桌上，亲戚们的问题如约而至——\n\n"找工作了吗？""打算去哪个城市？""有没有编制？"\n\n你把筷子放下，深呼一口气。',
+   options:[
+     {id:'F-012-A',text:'"还在努力，有进展会告诉你们的。"',effect:{stress:5,morale:3}},
+     {id:'F-012-B',text:'"都投着呢，不一定的。"（敷衍）',effect:{anxiety:10,stress:8}},
+     {id:'F-012-C',text:'借上厕所暂时逃离',effect:{anxiety:5,morale:-5}},
+     {id:'F-012-D',text:'借助这个契机认真聊聊未来',effect:{confidence:5,morale:8,stress:5},unlockFlag:'family_talk'},
+   ],isOneShot:true},
+  {id:'F-020',type:'fixed',category:'interview',chapter:3,title:'第一次群面',
+   desc:'你穿上了那套买了一年没穿过的正装，坐在一排陌生人旁边，等待群面开始。\n\n主考官把一道题放在屏幕上："请各位围绕\'共享经济的下一个蓝海\'进行20分钟的小组讨论。"\n\n全场沉默了三秒钟。',
+   options:[
+     {id:'F-020-A',text:'第一个开口，主动担任leader',effect:{confidence:10,stress:10},unlockFlag:'group_leader'},
+     {id:'F-020-B',text:'等别人先开口，然后补充',effect:{stress:5,anxiety:8}},
+     {id:'F-020-C',text:'认真记录，做好timekeeper',effect:{confidence:3,morale:5},unlockFlag:'group_timekeeper'},
+   ],isOneShot:true},
+  {id:'F-021',type:'fixed',category:'stress',chapter:3,title:'凌晨等笔试结果',
+   desc:'你躺在床上，手机放在枕边。\n\n今天的笔试……感觉还行？但最后两道大题没写完。\n\n凌晨一点，你刷了第十二遍邮件。没有新消息。\n\n你打开力扣，又关上了。',
+   options:[
+     {id:'F-021-A',text:'强迫自己睡觉，明天还有面试',effect:{stress:-5,anxiety:10}},
+     {id:'F-021-B',text:'刷题到凌晨三点',effect:{stress:15,anxiety:5,confidence:3},unlockFlag:'insomnia'},
+     {id:'F-021-C',text:'给朋友发消息吐槽，抱团取暖',effect:{anxiety:-5,morale:8,stress:5}},
+   ],isOneShot:true},
+  {id:'F-022',type:'fixed',category:'stress',chapter:3,title:'HR已读不回',
+   desc:'那家你最看好的公司，面试后一周了，没有任何消息。\n\n你在招聘平台上给HR发了一条"请问面试结果如何"。\n\n已读。\n\n没有回复。\n\n你刷新了三次，确认那个已读的勾是真实存在的。',
+   options:[
+     {id:'F-022-A',text:'再等等，可能是在走流程',effect:{anxiety:20,stress:10}},
+     {id:'F-022-B',text:'死心了，去投下一家',effect:{confidence:-10,morale:-5,stress:-5},unlockFlag:'ghosted_once'},
+     {id:'F-022-C',text:'再发一条催催看',effect:{anxiety:5,confidence:3}},
+   ],isOneShot:true},
+  {id:'F-023',type:'fixed',category:'light',chapter:3,title:'第一个口头offer',
+   desc:'HR在电话里说："我们对您非常满意，offer很快会发过来，请注意查收邮件。"\n\n你挂掉电话，在宿舍楼道里站了一分钟。\n\n然后给妈妈打了个电话，说了三个字："有了。"',
+   options:[
+     {id:'F-023-A',text:'立刻接受，放弃其他面试',effect:{confidence:15,stress:-20,anxiety:-20,morale:15},unlockFlag:'first_offer_accepted'},
+     {id:'F-023-B',text:'有了保底，继续冲更好的',effect:{confidence:25,morale:20},unlockFlag:'has_offer_keep_going'},
+     {id:'F-023-C',text:'等等，这个offer还不够好',effect:{confidence:10,anxiety:10}},
+   ],isOneShot:true},
+  {id:'F-030',type:'fixed',category:'stress',chapter:4,title:'漫长的等待',
+   desc:'十一月的某一天，你意识到自己已经三天没投简历了。\n\n不是不想投，而是……已经不知道该投什么了。\n\n手机里存着七八个"等待结果"的公司，它们像石头一样沉在心底。',
+   options:[
+     {id:'F-030-A',text:'重新梳理，继续海投',effect:{stress:10,morale:5,anxiety:8}},
+     {id:'F-030-B',text:'给所有在等的公司发一遍进度询问',effect:{anxiety:5,confidence:3}},
+     {id:'F-030-C',text:'放空三天，休息一下',effect:{stress:-10,anxiety:-5,morale:8},unlockFlag:'took_rest'},
+   ],isOneShot:true},
+  {id:'F-031',type:'fixed',category:'social',chapter:4,title:'家里又来电话了',
+   desc:'"现在怎么样了？找到工作没？"\n\n你妈的声音从手机里传来，你听出了她藏在语气里的担心。\n\n你不知道怎么开口，沉默了两秒。',
+   options:[
+     {id:'F-031-A',text:'"快了快了，有消息告诉你。"',effect:{anxiety:8,morale:-3}},
+     {id:'F-031-B',text:'说实话，告诉她现在的压力',effect:{stress:-10,morale:10,anxiety:5},unlockFlag:'family_honest'},
+     {id:'F-031-C',text:'"有一个还在谈，挺好的。"（撒谎）',effect:{stress:5,confidence:-5}},
+   ],isOneShot:true},
+  {id:'F-032',type:'fixed',category:'social',chapter:4,title:'好友上岸了',
+   desc:'室友小张把手机屏幕推过来：是腾讯的offer截图。\n\n"哈，终于！你也快了！"\n\n他说得很自然，没有任何炫耀的意思。但你心里有什么东西，悄悄刺了一下。',
+   options:[
+     {id:'F-032-A',text:'真心为他高兴，问问他面试经验',effect:{confidence:5,morale:5,anxiety:5}},
+     {id:'F-032-B',text:'恭喜完就去图书馆，不想待在宿舍',effect:{anxiety:15,stress:10,morale:-5}},
+     {id:'F-032-C',text:'把这个当成动力，告诉自己快了',effect:{morale:10,confidence:3,anxiety:8}},
+   ],isOneShot:true},
+  {id:'F-040',type:'fixed',category:'turning',chapter:5,title:'Offer抉择时刻',
+   desc:'十二月中旬，你整理了一下手里的牌：\n\n还在等的公司还有两家，但offer期限截止日期就在明天。\n\n你盯着屏幕上的表格——薪资、城市、稳定性、发展前景……每一列都有自己的理由。\n\n要做决定了。',
+   options:[
+     {id:'F-040-A',text:'接受现有最好的offer，上岸为先',effect:{stress:-25,anxiety:-25,confidence:15,morale:10},unlockFlag:'offer_accepted'},
+     {id:'F-040-B',text:'再赌最后一次，继续等梦想公司',effect:{stress:15,anxiety:20},unlockFlag:'gambling_last'},
+     {id:'F-040-C',text:'放弃秋招，考虑其他出路',effect:{morale:-10,anxiety:10,confidence:-5},unlockFlag:'gave_up_qiuzhao'},
+   ],isOneShot:true},
+]
+
+const CONDITIONAL_EVENTS = [
+  {id:'C-CS-001',type:'conditional',category:'stress',title:'力扣日记',
+   desc:'你已经连续刷了三十天力扣。\n\n今天面试的算法题是一道"字节高频题"，你明明见过，就是脑子一片空白。\n\n事后你查了题解，发现就是上周刷过的原题。你盯着题解看了很久，没说话。',
+   options:[
+     {id:'C-CS-001-A',text:'死磕，再刷一遍',effect:{stress:15,confidence:5,morale:3}},
+     {id:'C-CS-001-B',text:'换个方法，去找专项练习',effect:{stress:5,confidence:8}},
+     {id:'C-CS-001-C',text:'找内推跳过笔试',effect:{confidence:10,morale:8},unlockFlag:'used_referral'},
+   ],
+   triggerCondition:{majors:['cs'],minChapter:2},weight:3},
+  {id:'C-FIN-001',type:'conditional',category:'social',title:'鄙视链现场',
+   desc:'群面现场，复旦金融的同学在自我介绍时说："我目前只考虑高盛和摩根，其他的都是备选。"\n\n他说这句话时神情自然，不带一点炫耀。\n\n你抬头看了他一眼，然后低下头整理了一下自己的发言提纲。',
+   options:[
+     {id:'C-FIN-001-A',text:'不在乎，专注自己的表现',effect:{confidence:3,morale:5}},
+     {id:'C-FIN-001-B',text:'有点动摇，感觉自己不够格',effect:{confidence:-15,anxiety:12}},
+     {id:'C-FIN-001-C',text:'他也没有offer，谁知道最后怎样',effect:{morale:8,confidence:5}},
+   ],
+   triggerCondition:{majors:['finance'],minChapter:3},weight:2},
+  {id:'C-MED-001',type:'conditional',category:'social',title:'规培困境',
+   desc:'你在医院实习，规培工资1500块/月。\n\n高中同班同学在互联网公司发了张图，说今天加班但是"痛并快乐着"，配了一张餐厅的炸鸡腿。\n\n你看着手里的工作餐，点了个赞，然后把手机放进口袋。',
+   options:[
+     {id:'C-MED-001-A',text:'医生是有意义的职业，我不后悔',effect:{morale:10,confidence:8,anxiety:5}},
+     {id:'C-MED-001-B',text:'有点动摇，考虑转行',effect:{confidence:-10,anxiety:20,morale:-10}},
+     {id:'C-MED-001-C',text:'熬过规培就好了，以后不一样',effect:{morale:5,stress:10}},
+   ],
+   triggerCondition:{majors:['medicine']},weight:3,isOneShot:true},
+  {id:'C-CIVIL-001',type:'conditional',category:'stress',title:'行业寒冬',
+   desc:'你打开招聘软件，发现今年建筑类岗位的数量比去年少了一半。\n\n某大型设计院的招聘负责人说，由于市场环境，今年HC有所缩减……\n\n你的同学里，有三个已经转行准备考公了。',
+   options:[
+     {id:'C-CIVIL-001-A',text:'坚守本专业，总有地方要人',effect:{confidence:5,stress:15,anxiety:10}},
+     {id:'C-CIVIL-001-B',text:'考虑转型——项目管理/房地产咨询',effect:{anxiety:8,morale:3}},
+     {id:'C-CIVIL-001-C',text:'准备考公/事业单位，求稳',effect:{morale:-5,anxiety:-5}},
+   ],
+   triggerCondition:{majors:['civil'],minChapter:2},weight:3,isOneShot:true},
+  {id:'C-EDU-001',type:'conditional',category:'stress',title:'学历歧视现场',
+   desc:'你打开心仪公司的JD，看到最后一行：\n\n"学历要求：211/985院校本科及以上。"\n\n你把页面滑回顶部，看了看公司logo，再看了看自己的简历。',
+   options:[
+     {id:'C-EDU-001-A',text:'还是投，简历不一定被卡',effect:{confidence:3,anxiety:10}},
+     {id:'C-EDU-001-B',text:'找有内推的人走后门',effect:{morale:5,confidence:8},unlockFlag:'used_referral'},
+     {id:'C-EDU-001-C',text:'换目标，这家不适合我',effect:{morale:-5,anxiety:-5}},
+     {id:'C-EDU-001-D',text:'好，让我记住这个名字，以后再说',effect:{morale:10,confidence:5}},
+   ],
+   triggerCondition:{schoolTiers:['C','D'],minChapter:2},weight:3},
+  {id:'C-EDU-002',type:'conditional',category:'stress',title:'顶校光环的重量',
+   desc:'面试官看到你的学校，眼睛亮了一下，然后问了一句让你噎住的话：\n\n"你们学校这么好，为什么来我们这种公司？"\n\n这句话的答案，你回答过很多次，但每一次都感觉有点不对。',
+   options:[
+     {id:'C-EDU-002-A',text:'"贵司的业务方向和我的规划高度契合。"',effect:{confidence:5,stress:5}},
+     {id:'C-EDU-002-B',text:'"我认为企业文化比平台名气更重要。"',effect:{confidence:8,morale:5}},
+     {id:'C-EDU-002-C',text:'"……"（沉默了一下，没想好怎么说）',effect:{confidence:-5,stress:10}},
+   ],
+   triggerCondition:{schoolTiers:['A'],minChapter:3},weight:2},
+  {id:'C-PSYCH-001',type:'conditional',category:'stress',title:'快撑不住了',
+   desc:'那天你坐在宿舍里，什么都没做，就这样坐了两个小时。\n\n不是不想动，只是动不了。\n\n脑子里一片嗡嗡声，全是还没回音的公司、还没做完的题，以及那个越来越近的毕业。',
+   options:[
+     {id:'C-PSYCH-001-A',text:'给自己放一天假，什么都不做',effect:{stress:-15,anxiety:-10,morale:10},unlockFlag:'took_rest'},
+     {id:'C-PSYCH-001-B',text:'去跑步，出出汗',effect:{stress:-10,morale:15,confidence:5}},
+     {id:'C-PSYCH-001-C',text:'打开电脑，继续干',effect:{stress:10,morale:-10}},
+   ],
+   triggerCondition:{minStress:65},weight:3,isOneShot:true},
+  {id:'C-CIVIL-SVC-001',type:'conditional',category:'turning',title:'国考报名截止',
+   desc:'报名截止日还有两天。\n\n你盯着公务员报名页面，旁边同学说："要不要一起报？稳稳当当的。"\n\n你想了想，家里人的声音在耳边隐约响起。',
+   options:[
+     {id:'C-CIVIL-SVC-001-A',text:'报名，全力备考',effect:{anxiety:-10,morale:5,stress:5},unlockFlag:'civil_exam_entered'},
+     {id:'C-CIVIL-SVC-001-B',text:'不报，专注秋招',effect:{morale:5,stress:5}},
+     {id:'C-CIVIL-SVC-001-C',text:'两个都试试，兵分两路',effect:{stress:20,anxiety:15},unlockFlag:'civil_exam_entered'},
+   ],
+   triggerCondition:{minChapter:2,maxChapter:3},weight:2,isOneShot:true},
+]
+
+// ═══════════════════════════════════════════════
+// 游戏逻辑
+// ═══════════════════════════════════════════════
+
+function getInitialAttributes(player) {
+  let c=50,s=20,a=15,m=60,money=50
+  const tier = player.schoolTier
+  if(tier==='A'){c+=10;s+=8}
+  if(tier==='B'){c+=5}
+  if(tier==='D'){c-=10;m+=5}
+  if(player.edu==='phd'){a+=10}
+  if(player.edu==='master_985'){c+=5;s+=5}
+  if(player.backgrounds.includes('big_tech_intern')){c+=15}
+  if(player.backgrounds.includes('financial_pressure')){money-=20;a+=10}
+  if(player.backgrounds.includes('cross_major')){c-=10;a+=5}
+  if(player.backgrounds.includes('family_connections')){money+=10}
+  if(player.backgrounds.includes('competition_award')){c+=8}
+  const cl=v=>Math.min(100,Math.max(0,v))
+  return {confidence:cl(c),stress:cl(s),anxiety:cl(a),morale:cl(m),money:cl(money)}
+}
+
+function matchesCond(cond,state) {
+  if(!cond) return true
+  const p=state.player
+  const {chapter,attributes,flags}=state
+  const {confidence,stress,anxiety,morale}=attributes
+  if(cond.minChapter!==undefined&&chapter<cond.minChapter)return false
+  if(cond.maxChapter!==undefined&&chapter>cond.maxChapter)return false
+  if(cond.majors?.length&&!cond.majors.includes(p.major))return false
+  if(cond.eduLevels?.length&&!cond.eduLevels.includes(p.edu))return false
+  if(cond.schoolTiers?.length&&!cond.schoolTiers.includes(p.schoolTier))return false
+  // 多求职目标：任意一个匹配即可
+  if(cond.jobTargets?.length&&!cond.jobTargets.some(t=>p.jobTargets.includes(t)))return false
+  if(cond.backgrounds?.length&&!cond.backgrounds.some(b=>p.backgrounds.includes(b)))return false
+  if(cond.minConfidence!==undefined&&confidence<cond.minConfidence)return false
+  if(cond.maxConfidence!==undefined&&confidence>cond.maxConfidence)return false
+  if(cond.minStress!==undefined&&stress<cond.minStress)return false
+  if(cond.maxStress!==undefined&&stress>cond.maxStress)return false
+  if(cond.minAnxiety!==undefined&&anxiety<cond.minAnxiety)return false
+  if(cond.minMorale!==undefined&&morale<cond.minMorale)return false
+  if(cond.flags?.length&&!cond.flags.every(f=>flags.has(f)))return false
+  if(cond.notFlags?.length&&cond.notFlags.some(f=>flags.has(f)))return false
+  return true
+}
+
+function drawConditional(state,count) {
+  const elig=CONDITIONAL_EVENTS.filter(e=>{
+    if(e.isOneShot&&state.triggeredEventIds.has(e.id))return false
+    return matchesCond(e.triggerCondition,state)
+  })
+  const res=[],used=new Set()
+  for(let i=0;i<count;i++){
+    const av=elig.filter(e=>!used.has(e.id))
+    if(!av.length)break
+    const tot=av.reduce((s,e)=>s+(e.weight||1),0)
+    let r=Math.random()*tot
+    for(const e of av){r-=(e.weight||1);if(r<=0){res.push(e);used.add(e.id);break}}
+  }
+  return res
+}
+
+function buildChapter(state) {
+  const fixed=FIXED_EVENTS.filter(e=>e.chapter===state.chapter&&!(e.isOneShot&&state.triggeredEventIds.has(e.id)))
+  const cond=drawConditional(state,state.chapter===3?2:1)
+  const q=[],f=[...fixed],c=[...cond]
+  while(f.length||c.length){
+    if(f.length)q.push(f.shift())
+    if(c.length)q.push(c.shift())
+  }
+  return q
+}
+
+function applyFx(attrs,fx){
+  const r={...attrs}
+  for(const[k,v]of Object.entries(fx||{}))if(r[k]!==undefined)r[k]=Math.min(100,Math.max(0,r[k]+v))
+  return r
+}
+
+function determineEnding(state){
+  const{attributes:at,flags:fl,player:p}=state
+
+  // ── 极端崩溃优先（最高优先级）──
+  if(at.stress >= 95 && at.anxiety >= 92 && at.morale < 18) return 'X1'   // 住进医院
+
+  // ── Flag 硬覆盖 ──
+  if(fl.has('startup_path'))                          return 'D2'
+  if(fl.has('spring_recruitment_ongoing'))            return 'E4'
+  if(fl.has('thesis_failed'))                         return 'X4'          // 论文没过
+  if(fl.has('gave_up_qiuzhao') || fl.has('given_up')){
+    if(at.morale >= 72 && at.stress < 32)             return 'X2'          // 环游世界
+    if(at.morale > 50)                                return 'D1'          // Gap Year
+    if(at.morale < 15)                                return 'X3'          // 彻底躺平
+    return 'E2'
+  }
+  if(fl.has('civil_exam_entered') && at.morale > 40) return 'B3'
+
+  // ── 属性计算 ──
+  const highConf  = at.confidence >= 68
+  const lowStress = at.stress < 58
+  const highMoral = at.morale >= 58
+  const collapsed = at.stress >= 82 && at.anxiety >= 78
+  const burnout   = at.stress >= 76 && at.morale < 32
+  const calm      = at.stress < 45  && at.anxiety < 45
+  const hasOffer  = fl.has('offer_accepted') || fl.has('first_offer_accepted')
+                 || (highConf && at.morale >= 55 && at.stress < 65)
+  const unhappyOffer = hasOffer && at.morale < 38 && at.stress > 62
+
+  // ── 二次崩溃条件 ──
+  if(at.stress >= 90 && at.anxiety >= 85)             return 'X1'
+
+  // ── 彻底躺平 ──
+  if(at.morale < 8 && !hasOffer)                      return 'X3'
+
+  // ── 说走就走（高心气 + 低压力 + 无offer） ──
+  if(at.morale >= 80 && at.stress < 28 && !hasOffer && !fl.has('civil_exam_entered')) return 'X2'
+
+  if(collapsed)                                       return 'E1'
+  if(burnout && !hasOffer)                            return 'E2'
+
+  // ── 委屈上岸 ──
+  if(unhappyOffer)                                    return 'O2'
+
+  if(fl.has('chosen_hometown') && highConf)           return 'B2'
+  if(highConf && lowStress && highMoral)              return hasOffer ? 'A1' : 'B1'
+  if(fl.has('has_offer_keep_going') && hasOffer && highConf) return 'A2'
+  if(fl.has('cross_major') && hasOffer)               return 'C2'
+  if(fl.has('college_reverse') && hasOffer)           return 'C4'
+  if(highConf && !lowStress && hasOffer)              return 'C3'
+  if(at.morale >= 50 && at.stress < 68)              return hasOffer ? 'B1' : 'C1'
+  if(calm && !hasOffer)                               return 'E3'
+  if(hasOffer)                                        return 'C3'
+  if(at.morale < 35)                                  return 'E2'
+  return 'E3'
+}
+
+function getCritical(at){
+  if(at.stress>=85&&at.anxiety>=75)return'⚠️ 你感到快撑不住了……'
+  if(at.morale<20)return'😮‍💨 你开始觉得躺平也没什么不好……'
+  if(at.money<15)return'💸 钱包见底了，压力又多了一层'
+  if(at.stress>=82)return'🔥 你感到一种孤注一掷的冲动'
+  if(at.stress<28&&at.anxiety<28)return'😌 你保持着一种奇特的平静'
+  return null
+}
+
+// ═══════════════════════════════════════════════
+// 状态
+// ═══════════════════════════════════════════════
+
+let G={
+  page:'index', step:1,
+  player:{edu:null,schoolTier:null,major:null,jobTargets:[],cities:[],backgrounds:[]},
+  state:null, eventQueue:[], eventHistory:[],
+  selectedIdx:null, showOptions:false, isTyping:false,
+  typedLen:0, typingTimer:null,
+  showMobileAttrs:false,
+  ending:null, storyTyped:'',
+  chapterEventsLeft:0,   // 本章还需生成的事件数
+  lastChoiceCtx:null,    // {eventTitle, choiceText} 上一个选择的上下文
+}
+
+// ═══════════════════════════════════════════════
+// 渲染
+// ═══════════════════════════════════════════════
+
+const $app=document.getElementById('app')
+
+function renderLoading(){
+  return`<section style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px 24px;text-align:center">
+  <div class="spinner" style="width:36px;height:36px;border-width:3px"></div>
+  <p style="font-size:15px;color:var(--text-2);font-weight:500">AI 正在为你生成个性化剧情</p>
+  <p style="font-size:13px;color:var(--text-3);max-width:260px;line-height:1.9">根据你的学历、专业和求职目标<br>量身定制专属事件，请稍候…</p>
+</section>`
+}
+
+// ═══════════════════════════════════════════════
+// 简历数据生成（模板化，无 AI 调用）
+// ═══════════════════════════════════════════════
+
+function buildResumeData(player) {
+  const lb = getPlayerLabels(player)
+  const schoolName = {
+    college:'某技术学院/高职',bachelor_normal:'某普通本科院校（双非）',
+    bachelor_211:'某211重点高校',bachelor_985:'某985顶尖高校',
+    master_normal:'某双非院校（硕士）',master_211:'某211高校（硕士）',
+    master_985:'某985高校（硕士）',phd:'某顶尖高校（博士）',
+  }[player.edu] || '某高校'
+
+  const eduYear = {
+    college:'2022—2025',bachelor_normal:'2021—2025',bachelor_211:'2021—2025',
+    bachelor_985:'2021—2025',master_normal:'2022—2025',master_211:'2022—2025',
+    master_985:'2022—2025',phd:'2019—2025',
+  }[player.edu] || '20XX—2025'
+
+  const gpa = {A:'3.85/4.0',B:'3.65/4.0',C:'3.30/4.0',D:'3.02/4.0'}[player.schoolTier] || '3.30/4.0'
+
+  const skillsMap = {
+    cs:['Python / Java / C++','MySQL · Redis · Linux','Git · 数据结构与算法'],
+    electronics:['Verilog / C / MATLAB','嵌入式系统 · PCB设计','信号处理 · 通信原理'],
+    civil:['AutoCAD / Revit / PKPM','建筑规范 · 施工管理','结构力学 · 工程造价'],
+    biology:['PCR · Western Blot · HPLC','Python数据处理 / R统计','生物信息学 · 文献检索'],
+    math:['Python / R / MATLAB','统计建模 · 机器学习','数学建模 · 数值计算'],
+    finance:['Excel/VBA · Wind · Bloomberg','金融建模 · 财务分析','CFA备考中 · DCF估值'],
+    accounting:['Excel · 用友 · SAP','财务报表分析 · 税务','四大准则 · 审计流程'],
+    business:['Excel · PPT · Python基础','市场分析 · 用户调研','项目管理 · 品牌营销'],
+    trade:['英语六级600+ / 小语种','国际贸易实务 · 外贸函电','SAP · 报关流程'],
+    law:['法律检索 · 合同起草','商事纠纷 · 公司法务','法律英语 · 模拟仲裁经历'],
+    chinese:['内容创作 · 公众号运营','新闻采写 · 文案策划','Adobe全家桶基础'],
+    history:['文献研究 · 田野调查','数字人文 / GIS基础','学术写作 · 档案整理'],
+    foreign_lang:['英语口译/笔译（二级）','第二外语 · 跨文化交际','同传基础 · 商务英语'],
+    medicine:['临床技能 · 病历书写','医学影像判读基础','SPSS统计 · 医学文献'],
+    nursing:['护理操作规范 · 急救技能','病房管理 · 患者沟通','护理文书 · 医疗质控'],
+  }
+  const skills = skillsMap[player.major] || ['专业技能','计算机办公软件','团队协作']
+
+  const expItems = []
+  if(player.backgrounds.includes('big_tech_intern'))
+    expItems.push({title:'互联网大厂实习',role:'产品/技术实习生',detail:'参与核心产品功能迭代，独立负责某模块开发，日均UV 10万+'})
+  if(player.backgrounds.includes('research_paper'))
+    expItems.push({title:'学术科研经历',role:'参与者/第一作者',detail:'发表/参与SCI或核心期刊论文，研究方向与目标岗位高度契合'})
+  if(player.backgrounds.includes('startup'))
+    expItems.push({title:'创业/副业项目',role:'联合创始人·核心成员',detail:'从0到1构建产品，获天使轮融资意向/用户数破千，主导产品与运营'})
+  if(player.backgrounds.includes('student_leader'))
+    expItems.push({title:'学生会/社团',role:'主席·负责人',detail:'统筹30+人团队，组织大型校级活动，获"优秀学生干部"称号'})
+  if(player.backgrounds.includes('competition_award'))
+    expItems.push({title:'专业竞赛获奖',role:'队长·核心队员',detail:'全国/省级专业竞赛一等奖，代表学校参赛，方案获企业导师好评'})
+  if(player.backgrounds.includes('cross_major'))
+    expItems.push({title:'跨专业修读',role:'辅修·自学',detail:`在${lb.major}基础上系统修读${lb.jobs}相关课程，完成认证，具备双向思维`})
+  if(player.backgrounds.includes('family_connections'))
+    expItems.push({title:'资源背景',role:'人脉积累',detail:'家庭具备一定行业资源，可获得内推渠道（不体现在简历上）'})
+
+  // 评分计算
+  let score = {A:82,B:70,C:56,D:42}[player.schoolTier] || 56
+  const bonusMap = {big_tech_intern:15,research_paper:12,startup:10,competition_award:8,student_leader:6,family_connections:4,cross_major:-5,financial_pressure:0}
+  for(const bg of player.backgrounds) score += bonusMap[bg]||0
+  score = Math.min(97, Math.max(18, score))
+
+  const scoreNote = score>=85?'竞争力强劲，大厂/头部单位值得一冲':
+    score>=70?'综合背景扎实，有一战之力，精投为主':
+    score>=55?'平均水平，多投多试，抓住每次面试机会':
+    score>=40?'背景偏弱，重点包装亮点，走差异化路线':
+    '逆风局——但逆风局里也出过最传奇的故事'
+
+  const tierLabel = {A:'S级·顶校',B:'A级·重点',C:'B级·普本',D:'C级·专科'}[player.schoolTier]||'B级'
+
+  return { lb, schoolName, eduYear, gpa, skills, expItems, score, scoreNote, tierLabel }
+}
+
+function renderResume() {
+  const p = G.player
+  const { lb, schoolName, eduYear, gpa, skills, expItems, score, scoreNote, tierLabel } = buildResumeData(p)
+
+  const expHtml = expItems.length ? `
+    <div class="resume-section">
+      <div class="resume-section-title">⭐ 主要经历</div>
+      ${expItems.map(e=>`
+        <div class="resume-exp-item">
+          <div class="resume-exp-title">${e.title}</div>
+          <div class="resume-exp-role">${e.role}</div>
+          <div class="resume-exp-detail">${e.detail}</div>
+        </div>`).join('')}
+    </div>` : `
+    <div class="resume-section">
+      <div class="resume-section-title">⭐ 主要经历</div>
+      <div class="resume-exp-detail" style="color:var(--text-3);font-style:italic">暂无突出经历 — 这也是很多人的起点</div>
+    </div>`
+
+  return `<section id="page-resume" class="page active fade-in">
+    <div class="resume-header-label">📄 你的秋招简历</div>
+    <p class="resume-sub-label">这是你的开局配置 · 五个月的战役，从这里开始</p>
+
+    <div class="resume-card">
+      <div class="resume-top">
+        <div class="resume-avatar">应</div>
+        <div class="resume-basic">
+          <div class="resume-name">应届毕业生（匿名）</div>
+          <div class="resume-meta">${lb.edu} · ${lb.major} · ${lb.cities}</div>
+        </div>
+        <div class="resume-tier-badge">${tierLabel}</div>
+      </div>
+
+      <div class="resume-section">
+        <div class="resume-section-title">🎓 教育经历</div>
+        <div class="resume-edu-school">${schoolName}</div>
+        <div class="resume-edu-detail">${lb.major} · ${eduYear} · GPA ${gpa}</div>
+      </div>
+
+      <div class="resume-section">
+        <div class="resume-section-title">🎯 求职意向</div>
+        <div class="resume-intent">${lb.jobs}<br><span style="color:var(--text-3);font-size:12px">目标城市：${lb.cities}</span></div>
+      </div>
+
+      ${expHtml}
+
+      <div class="resume-section">
+        <div class="resume-section-title">🔧 技能特长</div>
+        <div class="resume-skills">${skills.map(s=>`<span class="resume-skill-tag">${s}</span>`).join('')}</div>
+      </div>
+
+      <div class="resume-score-row">
+        <span class="resume-score-label">简历竞争力</span>
+        <div class="resume-score-bar">
+          <div class="resume-score-fill" id="resume-score-fill" style="width:0%"></div>
+        </div>
+        <span class="resume-score-num">${score}</span>
+      </div>
+      <div class="resume-score-note">${scoreNote}</div>
+    </div>
+
+    <div class="resume-bottom-nav">
+      <button class="btn-primary" data-a="resume-start" style="justify-content:center">投入秋招战场 <span class="btn-arrow">→</span></button>
+      <p class="resume-disclaimer">接下来由 AI 根据你的档案实时生成个性化剧情</p>
+    </div>
+  </section>`
+}
+
+function render(){
+  const fns={index:renderIndex,create:renderCreate,resume:renderResume,game:renderGame,ending:renderEnding,loading:renderLoading}
+  $app.innerHTML=fns[G.page]?.()??''
+  // 简历评分条动画
+  if(G.page==='resume'){
+    const {score}=buildResumeData(G.player)
+    requestAnimationFrame(()=>{
+      const el=document.getElementById('resume-score-fill')
+      if(el) setTimeout(()=>{ el.style.width=score+'%' },80)
+    })
+  }
+  bind()
+}
+
+// ── 首页 ──
+function renderIndex(){
+  return`<section id="page-index" class="page active fade-in">
+  <div class="index-badge"><span class="badge-dot"></span>2024届 秋招模拟器</div>
+  <h1 class="index-title">人生简历</h1>
+  <p class="index-sub">你的秋招，你来经历</p>
+  <p class="index-desc">选择你的身份背景，经历从八月到十二月的秋招全过程，<br>解锁属于你的专属结局</p>
+  <div class="features-row">
+    <div class="feat-chip"><span class="feat-chip-icon">🎲</span>个性化剧情</div>
+    <div class="feat-chip"><span class="feat-chip-icon">💫</span>16种结局</div>
+    <div class="feat-chip"><span class="feat-chip-icon">⚡</span>属性动态变化</div>
+    <div class="feat-chip"><span class="feat-chip-icon">📖</span>约10分钟</div>
+  </div>
+  <button class="btn-primary" id="btn-start" data-a="btn-start">开始我的秋招 <span class="btn-arrow">→</span></button>
+  <p class="index-disclaimer">游戏中所有公司名称仅用于模拟，不代表真实招聘情况</p>
+</section>`
+}
+
+// ── 创建角色 ──
+function renderCreate(){
+  const TITLES={
+    1:{step:'学历背景',title:'你的学历是？'},
+    2:{step:'专业方向',title:'你主修什么专业？'},
+    3:{step:'求职目标',title:'你想去哪类单位？',hint:'可多选'},
+    4:{step:'目标城市',title:'你想在哪里发展？',hint:'可多选，不同城市解锁不同事件'},
+    5:{step:'特殊经历',title:'有哪些特别的经历？',hint:'可多选，也可跳过'},
+  }
+  const info=TITLES[G.step]
+  const p=G.player
+  let body=''
+
+  if(G.step===1){
+    body=`<div class="opt-list">${EDU_OPTIONS.map(o=>`
+      <div class="opt-card ${p.edu===o.value?'selected':''}" data-a="setEdu" data-v="${o.value}">
+        <div class="opt-icon-wrap">${o.icon}</div>
+        <div class="opt-body"><div class="opt-name">${o.label}</div><div class="opt-desc">${o.desc}</div></div>
+        <div class="opt-check">✓</div>
+      </div>`).join('')}</div>`
+  } else if(G.step===2){
+    body=`<div class="opt-grid">${MAJOR_OPTIONS.map(o=>`
+      <div class="opt-tile ${p.major===o.value?'selected':''}" data-a="setMajor" data-v="${o.value}">
+        <span class="opt-tile-icon">${o.icon}</span>
+        <span class="opt-tile-name">${o.label}</span>
+      </div>`).join('')}</div>`
+  } else if(G.step===3){
+    body=`<div class="opt-list">${JOB_TARGET_OPTIONS.map(o=>`
+      <div class="opt-card ${p.jobTargets.includes(o.value)?'selected':''}" data-a="toggleJob" data-v="${o.value}">
+        <div class="opt-icon-wrap">${o.icon}</div>
+        <div class="opt-body"><div class="opt-name">${o.label}</div><div class="opt-desc">${o.desc}</div></div>
+        <div class="opt-check">✓</div>
+      </div>`).join('')}</div>
+      ${p.jobTargets.length>0?`<p class="multi-hint">已选：${p.jobTargets.map(v=>JOB_TARGET_OPTIONS.find(o=>o.value===v)?.label).join('、')}</p>`:''}`
+  } else if(G.step===4){
+    body=`<div class="opt-list">${CITY_OPTIONS.map(o=>`
+      <div class="opt-card ${p.cities.includes(o.value)?'selected':''}" data-a="toggleCity" data-v="${o.value}">
+        <div class="opt-icon-wrap">${o.icon}</div>
+        <div class="opt-body"><div class="opt-name">${o.label}</div><div class="opt-desc">${o.desc}</div></div>
+        <div class="opt-check">✓</div>
+      </div>`).join('')}</div>
+      ${p.cities.length>0?`<p class="multi-hint">已选：${p.cities.map(v=>CITY_OPTIONS.find(o=>o.value===v)?.label).join('、')}（可多选）</p>`:''}`
+  } else {
+    body=`<div class="opt-list">${BACKGROUND_OPTIONS.map(o=>`
+      <div class="opt-card ${p.backgrounds.includes(o.value)?'selected':''}" data-a="toggleBg" data-v="${o.value}">
+        <div class="opt-icon-wrap">${o.icon}</div>
+        <div class="opt-body"><div class="opt-name">${o.label}</div></div>
+        <div class="opt-check">✓</div>
+      </div>`).join('')}</div>`
+  }
+
+  const segs=[1,2,3,4,5].map(i=>`<div class="step-seg ${i<G.step?'done':i===G.step?'active':''}"></div>`).join('')
+  const canNext=G.step===1?!!p.edu:G.step===2?!!p.major:G.step===3?p.jobTargets.length>0:G.step===4?p.cities.length>0:true
+
+  return`<section id="page-create" class="page active fade-in">
+  <div class="step-track">${segs}</div>
+  <div class="create-header">
+    <span class="create-step-label">${info.step}</span>
+    <h2 class="create-title">${info.title}</h2>
+    ${info.hint?`<p class="create-hint">${info.hint}</p>`:''}
+  </div>
+  ${body}
+  <div class="bottom-nav-inner">
+    ${G.step>1?`<button class="btn-back" data-a="prev">← 上一步</button>`:''}
+    <button class="btn-next ${canNext?'enabled':'disabled'}" data-a="next">${G.step===5?'🚀 开始秋招':'下一步 →'}</button>
+  </div>
+</section>`
+}
+
+// ── 游戏页 ──
+function renderGame(){
+  const st=G.state
+  if(!st)return''
+  const ev=st.currentEvent
+  const cat=CAT_STYLE[ev?.category]||CAT_STYLE.random
+  const crit=getCritical(st.attributes)
+
+  return`<section id="page-game" class="page active">
+  <div class="game-layout">
+    <div class="game-topbar">
+      <div class="game-chapter">
+        <span class="chapter-pill">${CHAPTER_MONTHS[st.chapter]}</span>
+        <span class="chapter-title-text">${CHAPTER_NAMES[st.chapter]}</span>
+      </div>
+      <div class="progress-dots">${G.eventHistory.slice(-6).map(()=>'<div class="pdot done"></div>').join('')}${ev?'<div class="pdot cur"></div>':''}</div>
+    </div>
+
+    ${renderAttrHud(st.attributes, crit)}
+
+    <div class="game-main">
+      ${ev?`
+      <div class="event-card" id="event-card">
+        <div class="event-cat-badge" style="background:${cat.bg};border-color:${cat.bd};color:${cat.txt}">${cat.lbl}${ev.isAI?'<span class="ai-badge">✨ AI生成</span>':''}</div>
+        <div class="event-title-text">${esc(ev.title)}</div>
+        <div class="event-desc-text" id="event-desc">${esc(ev.desc.slice(0,G.typedLen))}${G.isTyping?'<span class="cursor">▋</span>':''}</div>
+      </div>
+      ${G.showOptions?renderChoices(ev):''}
+      `:`<div class="loading-state"><div class="spinner"></div><span class="loading-text">AI 正在生成下一个事件…</span></div>`}
+    </div>
+  </div>
+</section>`
+}
+
+function renderAttrHud(at, crit){
+  const items=[
+    {k:'confidence', lbl:'信心', cls:'hud-fill-conf',  warn: at.confidence<30,  ok: at.confidence>=70},
+    {k:'stress',     lbl:'压力', cls:'hud-fill-stress', warn: at.stress>75,       ok: at.stress<30},
+    {k:'anxiety',    lbl:'焦虑', cls:'hud-fill-anx',   warn: at.anxiety>75,      ok: at.anxiety<25},
+    {k:'morale',     lbl:'心气', cls:'hud-fill-mor',   warn: at.morale<25,       ok: at.morale>=70},
+    {k:'money',      lbl:'余额', cls:'hud-fill-money', warn: at.money<20,        ok: at.money>=70},
+  ]
+  const chips=items.map(b=>`
+    <div class="hud-item ${b.warn?'hud-warn':b.ok?'hud-ok':''}">
+      <div class="hud-name">${b.lbl}</div>
+      <div class="hud-val" style="color:${b.warn?'#c49898':b.ok?'#8ab09c':'var(--text-1)'}">${at[b.k]}</div>
+      <div class="hud-track"><div class="hud-fill ${b.cls}" style="width:${at[b.k]}%"></div></div>
+    </div>`).join('')
+  return`<div class="attr-hud">${chips}${crit?`<div class="critical-msg" style="flex-basis:100%;margin-top:0">${crit}</div>`:''}</div>`
+}
+
+function renderAttrItems(at){
+  return[
+    {k:'confidence',lbl:'信心',cls:'fill-conf'},
+    {k:'stress',    lbl:'压力',cls:'fill-stress'},
+    {k:'anxiety',   lbl:'焦虑',cls:'fill-anx'},
+    {k:'morale',    lbl:'心气',cls:'fill-mor'},
+    {k:'money',     lbl:'余额',cls:'fill-money'},
+  ].map(b=>`<div class="attr-row">
+    <div class="attr-label-row"><span class="attr-name">${b.lbl}</span><span class="attr-value">${at[b.k]}</span></div>
+    <div class="attr-track"><div class="attr-fill ${b.cls}" style="width:${at[b.k]}%"></div></div>
+  </div>`).join('')
+}
+
+function renderChoices(ev){
+  const LABELS={confidence:'信心',stress:'压力',anxiety:'焦虑',morale:'心气',money:'余额'}
+  return`<div class="choices-wrap">
+    <span class="choices-label">你会怎么做</span>
+    ${ev.options.map((opt,i)=>{
+      const sel=G.selectedIdx===i
+      const dim=G.selectedIdx!==null&&G.selectedIdx!==i
+      const tags=Object.entries(opt.effect||{}).filter(([,v])=>v!==0).map(([k,v])=>`<span class="effect-tag ${v>0?'effect-pos':'effect-neg'}">${LABELS[k]||k} ${v>0?'+':''}${v}</span>`).join('')
+      return`<button class="choice-btn ${sel?'selected':''} ${dim?'dimmed':''}" data-a="choose" data-i="${i}">
+        <div class="choice-num">${String.fromCharCode(65+i)}</div>
+        <div class="choice-body">
+          <div class="choice-text">${esc(opt.text)}</div>
+          ${tags?`<div class="choice-effects">${tags}</div>`:''}
+        </div>
+      </button>`
+    }).join('')}
+  </div>`
+}
+
+// ── 结局页 ──
+function renderEnding(){
+  const ed=ENDINGS_DATA[G.ending]||ENDINGS_DATA.E3
+  const at=G.state?.attributes||{confidence:50,stress:50,anxiety:50,morale:50}
+  const story=ENDING_STORIES[G.ending]||ENDING_STORIES.E3
+  const rarityLabel={rare:'⭐ 稀有结局',secret:'🔮 隐藏结局',uncommon:'✨ 不常见',common:'结局'}
+  return`<section id="page-ending" class="page active fade-in">
+  <div class="ending-wrap">
+    <div class="ending-hero" style="background:${ed.grad}">
+      <div class="ending-hero-content">
+        <div class="ending-rarity-badge">${rarityLabel[ed.rarity]||'结局'}</div>
+        <h2 class="ending-main-title">${ed.title}</h2>
+        <p class="ending-main-sub">${ed.sub}</p>
+        <div class="ending-stats">
+          ${[{k:'信心',v:at.confidence},{k:'压力',v:at.stress},{k:'焦虑',v:at.anxiety},{k:'心气',v:at.morale}].map(s=>`
+          <div class="stat-item"><span class="stat-val">${s.v}</span><span class="stat-key">${s.k}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-body" id="story-text">${G.storyTyped?esc(G.storyTyped):'<div class="ai-ending-loading"><div class="spinner"></div><span class="ai-ending-loading-text">AI 正在生成你的专属结局…</span></div>'}</div>
+      ${G.storyTyped.length>=story.length?`<div class="gold-quote" id="ending-quote">"${G._aiEndingResult?.quote||ed.quote}"</div>`:''}
+    </div>
+
+    ${G.storyTyped.length>=story.length?`
+    <div class="replay-card">
+      <div class="replay-card-title">你经历过的那些时刻</div>
+      ${G.eventHistory.slice(0,6).map(h=>`
+      <div class="replay-item">
+        <div class="replay-ev-name">${h.event.title}</div>
+        <div class="replay-choice"><span class="replay-arrow">→</span>${esc(h.event.options[h.choiceIdx]?.text||'')}</div>
+      </div>`).join('')}
+    </div>
+    <div class="ending-actions">
+      <button class="btn-primary" style="justify-content:center" data-a="share">🎴 &nbsp;生成并分享结局卡片</button>
+      <button class="btn-secondary" data-a="restart">↺ &nbsp;换个身份再来一局</button>
+    </div>`:''}
+  </div>
+</section>`
+}
+
+// ═══════════════════════════════════════════════
+// 工具
+// ═══════════════════════════════════════════════
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
+
+// ═══════════════════════════════════════════════
+// 方舟 API
+// ═══════════════════════════════════════════════
+
+const ARK_MODEL = 'ep-20260224204235-qmfjh'
+
+async function callArk(systemPrompt, userPrompt, opts = {}) {
+  try {
+    const controller = new AbortController()
+    const tid = setTimeout(() => controller.abort(), opts.timeout ?? 9000)
+    const resp = await fetch('/api/ark', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: ARK_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userPrompt   },
+        ],
+        temperature: opts.temperature ?? 0.85,
+        max_tokens:  opts.maxTokens  ?? 500,
+      }),
+      signal: controller.signal,
+    })
+    clearTimeout(tid)
+    if (!resp.ok) { console.warn('[Ark] HTTP', resp.status); return null }
+    const data = await resp.json()
+    return data.choices?.[0]?.message?.content?.trim() ?? null
+  } catch (e) {
+    if (e.name !== 'AbortError') console.warn('[Ark]', e.message)
+    return null
+  }
+}
+
+// ─── 玩家画像标签 ────────────────────────────────
+function getPlayerLabels(p) {
+  const eduMap  = {college:'专科',bachelor_normal:'普通本科',bachelor_211:'211本科',bachelor_985:'985本科',master_normal:'双非研究生',master_211:'211研究生',master_985:'985研究生',phd:'博士'}
+  const majorMap= {cs:'计算机/软件',electronics:'电子/通信',civil:'土木/建筑',biology:'生物/化学',math:'数学/统计',finance:'金融/经济',accounting:'会计/审计',business:'工商/市场',trade:'国际贸易',law:'法学',chinese:'中文/新闻',history:'历史/哲学',foreign_lang:'外语',medicine:'临床医学',nursing:'护理'}
+  const jobMap  = {big_tech:'互联网大厂',state_owned:'国有企业',foreign:'外资企业',civil_servant:'公务员',postgrad:'考研二战',explore:'自由探索'}
+  const cityMap = {tier1:'北上广深',new_tier1:'新一线',tier2:'二线城市',hometown:'回老家'}
+  return {
+    edu:    eduMap[p.edu]    || p.edu,
+    major:  majorMap[p.major] || p.major,
+    jobs:   (p.jobTargets||[]).map(j=>jobMap[j]||j).join('、') || '未定',
+    cities: (p.cities||[]).map(c=>cityMap[c]||c).join('、') || '未定',
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 数据开场动画（点击"开始我的秋招"后触发）
+// ═══════════════════════════════════════════════
+
+function showStatsIntro(onDone) {
+  const overlay = document.createElement('div')
+  overlay.id = 'stats-intro'
+
+  overlay.innerHTML = `
+    <div class="stats-year-label">2025年 · 中国高校应届毕业生秋招</div>
+
+    <div class="stats-counter-wrap">
+      <span class="stats-big-num" id="stats-big-num">0</span><span class="stats-big-unit">万</span>
+      <div class="stats-big-sub">位应届毕业生涌入这场秋招</div>
+    </div>
+
+    <div class="stats-divider"></div>
+
+    <div class="stats-grid">
+      <div class="stats-item">
+        <div class="stats-item-num">68<span style="font-size:0.55em;color:var(--text-2)">份</span></div>
+        <div class="stats-item-key">平均投递简历数</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-item-num">127<span style="font-size:0.55em;color:var(--text-2)">天</span></div>
+        <div class="stats-item-key">平均等待时长</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-item-num">22<span style="font-size:0.55em;color:var(--text-2)">%</span></div>
+        <div class="stats-item-key">最终 offer 获得率</div>
+      </div>
+    </div>
+
+    <div class="stats-closing">
+      而你，也是这<em>1222万</em>分之一。<br>
+      接下来，由你来经历。
+    </div>
+
+    <div class="stats-skip">点击任意位置开始 →</div>
+  `
+  document.body.appendChild(overlay)
+
+  // 计数器动画：0 → 1222（万）
+  const numEl = document.getElementById('stats-big-num')
+  const target = 1222
+  const duration = 2200   // ms
+  const startDelay = 450  // 等label淡入
+  let startTime = null
+
+  function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t) }
+
+  function tickCounter(ts) {
+    if (!startTime) startTime = ts
+    const elapsed = ts - startTime - startDelay
+    if (elapsed < 0) { requestAnimationFrame(tickCounter); return }
+    const progress = Math.min(elapsed / duration, 1)
+    const value = Math.round(easeOutExpo(progress) * target)
+    if (numEl) numEl.textContent = value
+    if (progress < 1) requestAnimationFrame(tickCounter)
+    else if (numEl) numEl.textContent = target
+  }
+  requestAnimationFrame(tickCounter)
+
+  let done = false
+  function finish() {
+    if (done) return; done = true
+    overlay.style.transition = 'opacity 0.6s ease'
+    overlay.style.opacity = '0'
+    setTimeout(() => { overlay.remove(); onDone() }, 600)
+  }
+
+  // 点击跳过（2.5s后才允许点击，避免误触）
+  let clickable = false
+  setTimeout(() => { clickable = true }, 2500)
+  overlay.addEventListener('click', () => { if (clickable) finish() })
+
+  // 自动推进：11秒后结束
+  setTimeout(finish, 11000)
+}
+
+// ═══════════════════════════════════════════════
+// 开场动画
+// ═══════════════════════════════════════════════
+
+function showIntroAnimation(onDone) {
+  const p = G.player
+  const lb = getPlayerLabels(p)
+  const overlay = document.createElement('div')
+  overlay.id = 'intro-overlay'
+
+  const profileItems = [
+    ['学历背景', lb.edu],
+    ['主修专业', lb.major],
+    ['求职目标', lb.jobs],
+    ['目标城市', lb.cities],
+  ].map(([k,v])=>`<div class="intro-profile-item"><span class="intro-profile-key">${k}</span><span class="intro-profile-val">${v}</span></div>`).join('')
+
+  const fallback = `你是一名${lb.edu}，主修${lb.major}。\n目标锁定${lb.jobs}，\n打算在${lb.cities}扎根。\n\n2024年八月，秋招的号角已经吹响。\n这一次，由你来经历。`
+
+  overlay.innerHTML = `
+    <div class="intro-label">正在加载你的档案</div>
+    <div class="intro-profile-wrap">
+      <div class="intro-profile-header"><span class="intro-profile-dot"></span><span>PLAYER PROFILE · 2024</span></div>
+      ${profileItems}
+    </div>
+    <div class="intro-narrative-wrap">
+      <div class="intro-narrative-text" id="intro-text"></div>
+    </div>
+    <div class="intro-skip-hint">点击任意位置跳过 →</div>
+  `
+  document.body.appendChild(overlay)
+
+  let done = false
+  function finish() {
+    if (done) return; done = true
+    clearInterval(typTimer)
+    overlay.style.transition = 'opacity 0.5s ease'
+    overlay.style.opacity = '0'
+    setTimeout(() => { overlay.remove(); onDone() }, 500)
+  }
+  overlay.addEventListener('click', finish)
+
+  let typTimer = null
+  function typeText(text) {
+    clearInterval(typTimer)
+    let idx = 0
+    const el = document.getElementById('intro-text')
+    if (!el) return
+    el.textContent = ''
+    typTimer = setInterval(() => {
+      idx += 2; if (idx >= text.length) { idx = text.length; clearInterval(typTimer) }
+      el.textContent = text.slice(0, idx)
+    }, 28)
+  }
+
+  // 延迟开始打字（等profile动画完成），直接用静态旁白
+  setTimeout(() => typeText(fallback), 1300)
+  // 6秒自动结束
+  setTimeout(finish, 6000)
+}
+
+// ═══════════════════════════════════════════════
+// AI 事件生成
+// ═══════════════════════════════════════════════
+
+async function generateAiEventForChapter(snapState) {
+  const lb = getPlayerLabels(snapState.player)
+  const month = 8 + (snapState.chapter - 1)
+  const sys = '你是《人生简历》秋招游戏的事件生成引擎。根据玩家画像生成一个秋招随机事件，语言口语化贴近中国当代大学生真实处境。严格输出JSON，无任何额外文字。'
+  const usr = `玩家：${lb.edu}，${lb.major}，目标${lb.jobs}，城市${lb.cities}
+当前：2024年${month}月，信心${snapState.attributes.confidence}/压力${snapState.attributes.stress}/焦虑${snapState.attributes.anxiety}
+
+请生成一个秋招随机事件，严格JSON格式：
+{
+  "title": "（8字以内标题）",
+  "desc": "（60-120字，第二人称，口语化，有具体细节）",
+  "options": [
+    {"text": "（选项1，15-25字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}},
+    {"text": "（选项2，15-25字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}},
+    {"text": "（选项3，15-25字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}}
+  ]
+}`
+  const raw = await callArk(sys, usr, { maxTokens: 550, timeout: 12000, temperature: 0.92 })
+  if (!raw) return null
+  try {
+    const jsonStr = raw.match(/\{[\s\S]*\}/)?.[0] ?? raw
+    const parsed  = JSON.parse(jsonStr)
+    if (!parsed.title || !parsed.desc || !Array.isArray(parsed.options) || parsed.options.length < 2) return null
+    return {
+      id: 'AI-' + Date.now(), type: 'ai', category: 'random',
+      title: parsed.title, desc: parsed.desc,
+      options: parsed.options.map((o, i) => ({
+        id: 'AI-opt-' + i, text: o.text || '继续', effect: o.effect || {},
+      })),
+      isAI: true, isOneShot: true,
+    }
+  } catch { return null }
+}
+
+// ═══════════════════════════════════════════════
+// AI 结局故事生成
+// ═══════════════════════════════════════════════
+
+async function generateAiEndingStory(endingId, state) {
+  const ed  = ENDINGS_DATA[endingId] || ENDINGS_DATA.E3
+  const lb  = getPlayerLabels(state.player)
+  const evs = (state.eventHistory || []).slice(-5)
+    .map(h => `${h.event.title}（→${h.event.options[h.choiceIdx]?.text || ''}）`).join('\n') || '（暂无）'
+  const sys = '你是一个叙事游戏的结局文案作者。语言温柔但真实，不说教，不空洞。严格按JSON格式输出，无其他内容。'
+  const usr = `为这位玩家写个性化秋招结局文案。
+
+玩家：${lb.edu}，${lb.major}，目标${lb.jobs}，在${lb.cities}
+结局：《${ed.title}》— ${ed.sub}
+
+玩家经历的关键事件：
+${evs}
+
+要求：
+1. 180-320字，第二人称（对"你"说话）
+2. 自然引用1-2个玩家实际经历的事件细节
+3. 温柔不煽情，真实不沉重，不说"一切都会好的"
+4. 结尾独立一行给出一句金句（15字以内）
+
+JSON格式：{"story":"（正文）","quote":"（金句，15字以内）"}`
+  const raw = await callArk(sys, usr, { maxTokens: 800, timeout: 18000, temperature: 0.87 })
+  if (!raw) return null
+  try {
+    const jsonStr = raw.match(/\{[\s\S]*\}/)?.[0] ?? raw
+    const parsed  = JSON.parse(jsonStr)
+    if (!parsed.story) return null
+    return { story: parsed.story, quote: parsed.quote || ed.quote }
+  } catch { return null }
+}
+
+// ═══════════════════════════════════════════════
+// 单事件生成（每次选择后按上下文生成下一个）
+// ═══════════════════════════════════════════════
+
+async function generateSingleEvent(state, prevCtx) {
+  const lb    = getPlayerLabels(state.player)
+  const month = 8 + (state.chapter - 1)
+  const cname = CHAPTER_NAMES[state.chapter] || `第${state.chapter}章`
+  const isLast = state.chapter === 5
+  const companies = MAJOR_COMPANIES[state.player.major] || '各类企业'
+  const hasHighStress = state.attributes.stress >= 65
+  const isOfferStage  = state.chapter >= 4
+
+  // 历史摘要（最近3条）
+  const history = state.eventHistory || G.eventHistory || []
+  const recentEvs = history.slice(-3)
+    .map(h => `「${h.event.title}」→ 选了「${h.event.options[h.choiceIdx]?.text || '未知'}」`).join('\n') || '无'
+
+  // 上一个选择的直接上下文（最关键的连贯性信号）
+  const prevChoiceBlock = prevCtx
+    ? `\n【上一个选择（必须影响本事件）】\n事件：「${prevCtx.eventTitle}」\n玩家选择：「${prevCtx.choiceText}」\n→ 请生成一个与这个选择有直接关联或自然延续的事件，让玩家感受到选择的后果。`
+    : ''
+
+  // 最后一个事件的特殊要求（offer 终局）
+  const isVeryLast = isLast && G.chapterEventsLeft === 0
+  const lastEventReq = isVeryLast ? `
+【终局事件要求】
+- 这是全游戏最后一个事件，必须是"offer 终极抉择"时刻
+- 详细描写两个性质不同的 offer 的纠结对比（如大厂 vs 公务员、高薪 vs 稳定）
+- 三个选项分别标记：unlockFlag:"offer_accepted" / unlockFlag:"has_offer_keep_going" / unlockFlag:"gave_up_qiuzhao"` : ''
+
+  const sys = '你是《人生简历》秋招模拟游戏的剧情引擎。严格输出单个事件的 JSON 对象，无任何额外文字或 markdown。'
+  const usr = `玩家档案：
+  学历：${lb.edu}，专业：${lb.major}，求职目标：${lb.jobs}，目标城市：${lb.cities}
+  本专业典型企业：${companies}
+
+当前：2024年${month}月 · ${cname}
+心理状态：信心${state.attributes.confidence} / 压力${state.attributes.stress} / 焦虑${state.attributes.anxiety} / 心气${state.attributes.morale} / 余额${state.attributes.money}
+近期经历：
+${recentEvs}${prevChoiceBlock}
+
+任务：生成 1 个秋招随机事件，要求：
+- 必须还原秋招真实高压感（拒信、已读不回、笔试超时、等通知等细节）
+- 使用具体公司名称增强代入感
+${hasHighStress ? '- 玩家压力很高，可写心态崩溃或意外转机的高戏剧性事件' : ''}
+${isOfferStage && !isVeryLast ? '- 可写口头 offer 或意向，让玩家感受"快有了"的焦灼感' : ''}
+- effect 数值范围 ±10~±30，坏事 stress/anxiety 至少 +15，好事 confidence/morale 至少 +15
+${lastEventReq}
+
+严格输出单个 JSON 对象（无其他任何文字）：
+{
+  "title": "（8字以内）",
+  "category": "stress|social|interview|light|turning",
+  "desc": "（80-130字，第二人称，口语化，有细节，有情绪张力）",
+  "options": [
+    {"text": "（15-30字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}},
+    {"text": "（15-30字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}},
+    {"text": "（15-30字）", "effect": {"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0}}
+  ]
+}`
+
+  const raw = await callArk(sys, usr, { maxTokens: 2500, timeout: 30000, temperature: 0.90 })
+  if (!raw) return null
+
+  try {
+    // 修复截断的 JSON：补全末尾缺失的括号
+    let jsonStr = raw.match(/\{[\s\S]*\}/)?.[0] ?? raw
+    if (!jsonStr.trim().endsWith('}')) {
+      // 尝试补全截断的 JSON
+      const openBraces = (jsonStr.match(/\{/g)||[]).length - (jsonStr.match(/\}/g)||[]).length
+      const openBrackets = (jsonStr.match(/\[/g)||[]).length - (jsonStr.match(/\]/g)||[]).length
+      jsonStr += ']'.repeat(Math.max(0,openBrackets)) + '}'.repeat(Math.max(0,openBraces))
+    }
+    const e = JSON.parse(jsonStr)
+    if (!e.title || !e.desc || !Array.isArray(e.options) || e.options.length < 2) return null
+    const idx = history.length
+    return {
+      id:       `AI-ch${state.chapter}-${idx}-${Date.now()}`,
+      type:     'ai', isAI: true, isOneShot: true,
+      chapter:  state.chapter,
+      category: CAT_STYLE[e.category] ? e.category : 'random',
+      title:    e.title,
+      desc:     e.desc,
+      options:  e.options.map((o, j) => ({
+        id: `AI-ch${state.chapter}-${idx}-opt${j}`,
+        text: (o.text || '继续').slice(0, 40),
+        effect: o.effect || {},
+        unlockFlag: o.unlockFlag,
+      })),
+    }
+  } catch (err) {
+    console.warn('[generateSingleEvent] parse error', err.message, raw.slice(0, 200))
+    return null
+  }
+}
+
+function getFallbackEvent(chapter) {
+  const month = 8 + chapter - 1
+  return {
+    id: `fallback-${chapter}-${Date.now()}`, type:'ai', isAI:false, isOneShot:true,
+    category:'random', chapter,
+    title:`${month}月·继续`,
+    desc:`${month}月的秋招仍在继续。\n\n投简历、等消息、刷题、面试……这些已经成了你生活的底色。\n\n今天没什么大事，但日子还是得过。你坐在椅子上，打开电脑，告诉自己再坚持一下。`,
+    options:[
+      {id:'fb-a',text:'打起精神，今天再投几家',effect:{confidence:5,morale:5,stress:5}},
+      {id:'fb-b',text:'找朋友聊聊，散散心',effect:{morale:10,anxiety:-5,stress:-5}},
+      {id:'fb-c',text:'什么都不做，发了一会儿呆',effect:{stress:-8,morale:-3,anxiety:5}},
+    ],
+  }
+}
+
+// ═══════════════════════════════════════════════
+// Canvas 分享卡片
+// ═══════════════════════════════════════════════
+
+function parseGradColors(gradStr) {
+  return (gradStr.match(/#[a-f0-9]{6}/gi) || ['#7a8aae','#8a9abe'])
+}
+
+function canvasRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y)
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r)
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h)
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r)
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y)
+  ctx.closePath()
+}
+
+function canvasWrapText(ctx, text, cx, startY, maxW, lineH) {
+  const chars = [...text]; let line = ''; let y = startY
+  for (let i = 0; i < chars.length; i++) {
+    const test = line + chars[i]
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, cx, y); line = chars[i]; y += lineH
+    } else { line = test }
+  }
+  if (line) ctx.fillText(line, cx, y)
+  return y + lineH
+}
+
+function buildShareCanvas() {
+  const ed  = ENDINGS_DATA[G.ending] || ENDINGS_DATA.E3
+  const at  = G.state?.attributes || {}
+  const lb  = getPlayerLabels(G.player)
+  const quote = G._aiEndingResult?.quote || ed.quote
+  const rarityLabel = {rare:'⭐ 稀有结局',secret:'🔮 隐藏结局',uncommon:'✨ 不常见',common:'普通结局'}
+
+  const W = 750, H = 1280
+  const canvas = document.createElement('canvas')
+  canvas.width = W; canvas.height = H
+  const ctx = canvas.getContext('2d')
+  const font = (size, weight='normal') => `${weight} ${size}px -apple-system,"PingFang SC","Helvetica Neue",sans-serif`
+
+  // 背景渐变
+  const cols = parseGradColors(ed.grad)
+  const bg = ctx.createLinearGradient(0, 0, W, H)
+  bg.addColorStop(0, cols[0]); bg.addColorStop(1, cols[1])
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
+  // 暗层
+  ctx.fillStyle = 'rgba(0,0,0,0.38)'; ctx.fillRect(0, 0, W, H)
+  // 顶部噪点纹理感（细线）
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1
+  for(let y=0;y<H;y+=6){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  ctx.textAlign = 'center'
+
+  // 顶部品牌
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = font(26)
+  ctx.fillText('人生简历 · 秋招模拟器', W/2, 70)
+
+  // 稀有度徽章
+  const rl = rarityLabel[ed.rarity] || '结局'
+  ctx.fillStyle = 'rgba(255,255,255,0.15)'
+  canvasRoundRect(ctx, W/2-90, 96, 180, 44, 22); ctx.fill()
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = font(22)
+  ctx.fillText(rl, W/2, 124)
+
+  // 主标题
+  ctx.fillStyle = '#fff'; ctx.font = font(78, 'bold')
+  ctx.fillText(ed.title, W/2, 250)
+
+  // 副标题
+  ctx.fillStyle = 'rgba(255,255,255,0.72)'; ctx.font = font(30)
+  canvasWrapText(ctx, ed.sub, W/2, 305, 620, 46)
+
+  // 属性方块
+  const stats = [['信心',at.confidence||'--'],['压力',at.stress||'--'],['焦虑',at.anxiety||'--'],['心气',at.morale||'--']]
+  stats.forEach(([k,v],i)=>{
+    const col = i%2, row = Math.floor(i/2)
+    const bx = 100 + col*310, by = 430 + row*140
+    ctx.fillStyle='rgba(255,255,255,0.13)'
+    canvasRoundRect(ctx,bx-100,by-55,200,110,16); ctx.fill()
+    ctx.fillStyle='#fff'; ctx.font=font(52,'bold')
+    ctx.fillText(v, bx, by+2)
+    ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font=font(24)
+    ctx.fillText(k, bx, by+40)
+  })
+
+  // 分隔线
+  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=1
+  ctx.beginPath(); ctx.moveTo(80,790); ctx.lineTo(W-80,790); ctx.stroke()
+
+  // 金句
+  ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.font=`italic ${font(32)}`
+  canvasWrapText(ctx, `"${quote}"`, W/2, 845, 570, 52)
+
+  // 分隔线2
+  ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1
+  ctx.beginPath(); ctx.moveTo(80,1040); ctx.lineTo(W-80,1040); ctx.stroke()
+
+  // 玩家信息
+  ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.font=font(24)
+  ctx.fillText(`${lb.edu} · ${lb.major}`, W/2, 1080)
+  ctx.fillStyle='rgba(255,255,255,0.30)'; ctx.font=font(22)
+  ctx.fillText(`目标：${lb.jobs}  |  ${lb.cities}`, W/2, 1115)
+
+  // 底部
+  ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.font=font(20)
+  ctx.fillText('2024届秋招模拟器 · 人生简历', W/2, 1210)
+
+  return canvas
+}
+
+async function openShareModal() {
+  const ed = ENDINGS_DATA[G.ending] || ENDINGS_DATA.E3
+  const canvas = buildShareCanvas()
+  const img = canvas.toDataURL('image/png')
+  const quote = G._aiEndingResult?.quote || ed.quote
+
+  const modal = document.createElement('div')
+  modal.id = 'share-modal'
+  modal.innerHTML = `
+    <div class="share-modal-card">
+      <div class="share-modal-title">🎴 你的秋招结局卡片</div>
+      <img id="share-canvas-preview" src="${img}" alt="结局卡片">
+      <div class="share-btn-row">
+        <button class="share-action-btn share-btn-primary" id="share-dl">💾 保存图片</button>
+        <button class="share-action-btn share-btn-secondary" id="share-cp">📤 分享文字</button>
+      </div>
+      <button class="share-close-btn" id="share-close">关闭</button>
+    </div>
+  `
+  document.body.appendChild(modal)
+
+  document.getElementById('share-dl').onclick = () => {
+    const a = document.createElement('a')
+    a.download = `秋招结局-${ed.title}.png`; a.href = img; a.click()
+  }
+  document.getElementById('share-cp').onclick = () => {
+    const text = `我的秋招结局：${ed.title}\n\n"${quote}"\n\n— 人生简历·秋招模拟器`
+    if (navigator.share) {
+      navigator.share({ title: `我的秋招结局：${ed.title}`, text, url: location.href }).catch(()=>{})
+    } else {
+      navigator.clipboard?.writeText(text).then(() => {
+        document.getElementById('share-cp').textContent = '✓ 已复制'
+        setTimeout(() => { const el = document.getElementById('share-cp'); if(el) el.textContent = '📤 分享文字' }, 2000)
+      })
+    }
+  }
+  document.getElementById('share-close').onclick = () => modal.remove()
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove() })
+}
+
+// ═══════════════════════════════════════════════
+// 事件绑定
+// ═══════════════════════════════════════════════
+
+function bind(){
+  document.querySelectorAll('[data-a]').forEach(el=>{
+    el.addEventListener('click',onAction)
+  })
+  const card=document.getElementById('event-card')
+  if(card) card.addEventListener('click',skipType)
+}
+
+function onAction(e){
+  const el=e.currentTarget||e.target.closest('[data-a]')
+  if(!el) return
+  const a=el.dataset.a, v=el.dataset.v, i=el.dataset.i
+
+  if(a==='setEdu'){G.player.edu=v;G.player.schoolTier=EDU_OPTIONS.find(o=>o.value===v)?.tier||'C';render()}
+  else if(a==='setMajor'){G.player.major=v;render()}
+  else if(a==='toggleJob'){
+    const js=G.player.jobTargets
+    G.player.jobTargets=js.includes(v)?js.filter(x=>x!==v):[...js,v];render()
+  }
+  else if(a==='toggleCity'){
+    const cs=G.player.cities
+    G.player.cities=cs.includes(v)?cs.filter(x=>x!==v):[...cs,v];render()
+  }
+  else if(a==='toggleBg'){
+    const bs=G.player.backgrounds
+    G.player.backgrounds=bs.includes(v)?bs.filter(x=>x!==v):[...bs,v];render()
+  }
+  else if(a==='prev'){G.step--;render()}
+  else if(a==='next'){
+    const p=G.player
+    const ok=[,!!p.edu,!!p.major,p.jobTargets.length>0,p.cities.length>0,true][G.step]
+    if(!ok)return
+    if(G.step<5){G.step++;render()}else{ G.page='resume'; render() }
+  }
+  else if(a==='toggleMobileAttrs'){G.showMobileAttrs=!G.showMobileAttrs;render()}
+  else if(a==='choose')makeChoice(parseInt(i))
+  else if(a==='resume-start')startGame()
+  else if(a==='restart')resetGame()
+  else if(a==='share'){ openShareModal() }
+  else if(a==='btn-start'){
+    showStatsIntro(()=>{ G.page='create'; render() })
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 游戏流程
+// ═══════════════════════════════════════════════
+
+function startGame(){
+  const p=G.player
+  if(p.cities?.includes('hometown')) p._initFlags=['chosen_hometown']
+  G.state={
+    chapter:1, chapterProgress:0, player:p,
+    attributes:getInitialAttributes(p),
+    flags:new Set(p._initFlags||[]),
+    triggeredEventIds:new Set(),
+    currentEvent:null,
+  }
+  G.eventHistory=[]; G.selectedIdx=null; G.showOptions=false
+  G.isTyping=false; G.showMobileAttrs=false; G._aiEndingResult=null
+  G.lastChoiceCtx=null
+  G.chapterEventsLeft = ([0,3,4,4,3,3][1] || 3) - 1  // 第1章事件数 - 1（第一个事件先生成）
+  clearInterval(G.typingTimer)
+  render()
+
+  // 双轨并行：开场动画 + 生成第一个事件
+  let firstEvent = null
+  let introDone  = false
+
+  function tryStartGame() {
+    if (!introDone || firstEvent === null) return
+    G.eventQueue = firstEvent ? [firstEvent] : [getFallbackEvent(1)]
+    G.page = 'game'
+    loadNext()
+  }
+
+  generateSingleEvent(G.state, null).then(ev => {
+    firstEvent = ev || getFallbackEvent(1)
+    if (introDone) tryStartGame()
+  })
+
+  showIntroAnimation(() => {
+    introDone = true
+    if (firstEvent === null) { G.page='loading'; render() }
+    tryStartGame()
+  })
+}
+
+function loadNext(){
+  if(!G.eventQueue.length){
+    if(G.state.chapter>=5){endGame();return}
+    doChapterTransition();return
+  }
+  G.state.currentEvent=G.eventQueue.shift()
+  G.state.triggeredEventIds.add(G.state.currentEvent.id)
+  G.selectedIdx=null;G.showOptions=false;G.typedLen=0;G.isTyping=true
+  render()
+  startTyping()
+}
+
+function startTyping(){
+  const ev=G.state.currentEvent
+  if(!ev)return
+  const len=ev.desc.length
+  let cur=0
+  const spd=Math.max(15,Math.min(35,len/70))
+  G.typingTimer=setInterval(()=>{
+    cur+=2
+    if(cur>=len){cur=len;clearInterval(G.typingTimer);G.isTyping=false;updateDesc();setTimeout(()=>{G.showOptions=true;render()},250);return}
+    G.typedLen=cur;updateDesc()
+  },spd)
+}
+
+function updateDesc(){
+  const el=document.getElementById('event-desc')
+  if(!el||!G.state.currentEvent)return
+  el.innerHTML=esc(G.state.currentEvent.desc.slice(0,G.typedLen))+(G.isTyping?'<span class="cursor">▋</span>':'')
+}
+
+function skipType(){
+  if(!G.isTyping||!G.state.currentEvent)return
+  clearInterval(G.typingTimer)
+  G.typedLen=G.state.currentEvent.desc.length
+  G.isTyping=false;G.showOptions=true;render()
+}
+
+function makeChoice(idx){
+  if(G.selectedIdx!==null)return
+  const ev=G.state.currentEvent
+  if(!ev)return
+  const opt=ev.options[idx]
+  if(!opt)return
+  G.selectedIdx=idx
+  G.state.attributes=applyFx(G.state.attributes,opt.effect)
+  if(opt.unlockFlag)G.state.flags.add(opt.unlockFlag)
+  G.eventHistory.push({event:ev,choiceIdx:idx})
+  G.state.chapterProgress++
+  // 记录本次选择上下文，供下一个事件生成使用
+  G.lastChoiceCtx = { eventTitle: ev.title, choiceText: opt.text }
+  render()
+  setTimeout(()=>{
+    G.selectedIdx=null
+    // 本章还有事件要生成 → 立即触发下一个事件的 AI 生成
+    if(G.chapterEventsLeft > 0){
+      G.chapterEventsLeft--
+      G.page='game'
+      G.state.currentEvent=null  // 显示 loading 态
+      render()
+      const ctx=G.lastChoiceCtx
+      const st=G.state
+      generateSingleEvent(st, ctx).then(nextEv=>{
+        G.eventQueue=[nextEv || getFallbackEvent(st.chapter)]
+        loadNext()
+      })
+    } else {
+      loadNext()
+    }
+  },550)
+}
+
+function doChapterTransition(){
+  const next = G.state.chapter + 1
+  if (next > 5) { endGame(); return }
+
+  G.state.chapter = next
+  G.state.chapterProgress = 0
+  G.lastChoiceCtx = null  // 新章节不继承上章选择上下文
+  G.chapterEventsLeft = ([0,3,4,4,3,3][next] || 3) - 1
+
+  const overlay = document.createElement('div')
+  overlay.className = 'chapter-overlay'
+  overlay.innerHTML = `<div class="ch-label">${CHAPTER_MONTHS[next]}</div><div class="ch-title">${CHAPTER_NAMES[next]}</div><div class="ch-line"></div>`
+  document.body.appendChild(overlay)
+
+  let overlayDone = false
+  let firstEvent  = null
+
+  function tryProceed() {
+    if (!overlayDone || firstEvent === null) return
+    G.eventQueue = [firstEvent]
+    G.page = 'game'
+    loadNext()
+  }
+
+  generateSingleEvent(G.state, null).then(ev => {
+    firstEvent = ev || getFallbackEvent(next)
+    tryProceed()
+  })
+
+  setTimeout(() => {
+    overlay.remove()
+    overlayDone = true
+    if (firstEvent === null) { G.page='loading'; render() }
+    tryProceed()
+  }, 2200)
+}
+
+function endGame(){
+  G.ending=determineEnding(G.state)
+  G.storyTyped=''
+  G._aiEndingResult=null
+  G.page='ending'
+  render()
+
+  function startStoryTypewriter(story){
+    let idx=0
+    const t=setInterval(()=>{
+      idx+=3;if(idx>=story.length){idx=story.length;clearInterval(t)}
+      G.storyTyped=story.slice(0,idx)
+      const el=document.getElementById('story-text')
+      if(el)el.innerHTML=esc(G.storyTyped)
+      if(idx>=story.length)render()
+    },22)
+  }
+
+  // 先尝试 AI 生成，超时则用静态文案
+  generateAiEndingStory(G.ending, G.state).then(result=>{
+    const ed=ENDINGS_DATA[G.ending]||ENDINGS_DATA.E3
+    if(result){
+      G._aiEndingResult=result
+      startStoryTypewriter(result.story)
+    } else {
+      startStoryTypewriter(ENDING_STORIES[G.ending]||ENDING_STORIES.E3)
+    }
+  })
+}
+
+function resetGame(){
+  clearInterval(G.typingTimer)
+  G={page:'index',step:1,
+    player:{edu:null,schoolTier:null,major:null,jobTargets:[],cities:[],backgrounds:[]},
+    state:null,eventQueue:[],eventHistory:[],
+    selectedIdx:null,showOptions:false,isTyping:false,
+    typedLen:0,typingTimer:null,showMobileAttrs:false,
+    ending:null,storyTyped:'',_aiEndingResult:null}
+  render()
+}
+
+// 启动
+render()
+</script>
+</body>
+</html>

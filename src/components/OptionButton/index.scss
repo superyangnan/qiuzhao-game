@@ -1,0 +1,55 @@
+.option-btn {
+  display: flex;
+  align-items: flex-start;
+  padding: 22px 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  margin-bottom: 14px;
+  transition: all 0.2s ease;
+  active-style: background rgba(255, 255, 255, 0.14);
+
+  &:active {
+    background: rgba(255, 255, 255, 0.14);
+    transform: scale(0.98);
+  }
+
+  &.selected {
+    background: rgba(99, 163, 255, 0.18);
+    border-color: rgba(99, 163, 255, 0.5);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.option-label-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 16px;
+  margin-top: 2px;
+}
+
+.option-label {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.option-text {
+  flex: 1;
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.7;
+}

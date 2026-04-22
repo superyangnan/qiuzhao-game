@@ -1,0 +1,208 @@
+.interview-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  background: #0d0d1a;
+  z-index: 0;
+}
+
+// ─── 面试官栏 ────────────────────────────────────────
+.interviewer-bar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  padding: 16px 28px;
+  background: rgba(20, 20, 40, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.interviewer-avatar {
+  font-size: 48px;
+  margin-right: 16px;
+}
+
+.interviewer-info {
+  flex: 1;
+}
+
+.interviewer-name {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.interviewer-company {
+  display: block;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 4px;
+}
+
+.turn-counter {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  padding: 8px 16px;
+}
+
+.turn-text {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+// ─── 对话区 ────────────────────────────────────────
+.chat-area {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.chat-content {
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chat-bubble-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+
+  &.player {
+    flex-direction: row-reverse;
+  }
+}
+
+.bubble-avatar {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 18px 20px;
+  border-radius: 18px;
+
+  &.interviewer {
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom-left-radius: 4px;
+  }
+
+  &.player {
+    background: rgba(102, 126, 234, 0.25);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-bottom-right-radius: 4px;
+  }
+
+  &.loading {
+    padding: 14px 20px;
+  }
+}
+
+.bubble-text {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.7;
+}
+
+.loading-dots {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.4);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+// ─── 结果横幅 ────────────────────────────────────────
+.result-banner {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.result-text {
+  display: block;
+  font-size: 40px;
+  font-weight: 800;
+  margin-bottom: 24px;
+
+  &.pass   { color: #2ecc71; }
+  &.fail   { color: rgba(255, 255, 255, 0.5); }
+}
+
+.btn-finish {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 100px;
+  padding: 16px 40px;
+
+  &:active { opacity: 0.8; }
+}
+
+.btn-finish-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+}
+
+// ─── 输入区 ────────────────────────────────────────
+.input-area {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  background: rgba(20, 20, 40, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  padding: 20px 24px;
+  font-size: 28px;
+  color: white;
+  min-height: 80px;
+}
+
+.input-placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.send-btn {
+  width: 88px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &.enabled {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    &:active { opacity: 0.8; transform: scale(0.95); }
+  }
+
+  &.disabled {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.send-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+}
