@@ -2078,15 +2078,15 @@ async function generateSingleEvent(state, prevCtx) {
 ${recentEvs}${prevChoiceBlock}
 
 任务：生成1个秋招随机事件。
-- 请根据玩家当前的属性和"全局经历线"自主判断事件走向：
+- 请根据玩家当前的属性和"全局经历线"自主判断事件走向，**请务必将剧情主线聚焦在求职、面试、笔试、投递简历等秋招核心环节上，尽量减少无关的纯社交或校园日常事件**：
   1. 若努力值(effort)较高(>60)且到了10月后，可以发口头offer或面试通过等正向反馈。
-  2. 若压力很高(stress>75)，可写崩溃时刻或父母打来电话等治愈系小确幸(light事件)。
-  3. 若一切平平，则还原真实的秋招高压感或群面认识同好等社交事件。
+  2. 若压力很高(stress>75)，可写深夜崩溃、笔试做不出的无力感，或者偶尔的父母电话等治愈系小确幸(light事件，但比重不宜过高)。
+  3. 若一切平平，则还原真实的秋招高压感：群面被神仙打架碾压、简历石沉大海、或者HR的冰冷回复。
 - effect范围±10~±30，必须包含 effort 属性的变化（注意：努力值极难获取，增加幅度应在+2~+5，减少幅度可为-5~-15）。
 ${lastEventReq}
 
 JSON格式：
-{"title":"(8字内)","category":"stress|social|interview|light|turning","desc":"(80-120字，第二人称口语化)","options":[{"text":"(15字内)","effect":{"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0,"effort":0}}]} (提供3个选项)`
+{"title":"(8字内)","category":"interview|stress|light|turning","desc":"(80-120字，第二人称口语化)","options":[{"text":"(15字内)","effect":{"confidence":0,"stress":0,"anxiety":0,"morale":0,"money":0,"effort":0}}]} (提供3个选项)`
 
   // 优化：提高 maxTokens 避免长历史脉络导致截断，同时保持较快的 timeout
   const raw = await callArk(sys, usr, { maxTokens: 600, timeout: 15000, temperature: 0.85 })
