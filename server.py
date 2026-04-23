@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 人生简历 · 本地开发服务器
-- 静态文件服务（伺服 preview.html 等）
+- 静态文件服务（伺服 index.html 等）
 - /api/ark  →  方舟 API 反向代理（解决浏览器 CORS 限制）
 """
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     port   = int(os.environ.get('PORT', 8899))
     server = ThreadingHTTPServer(('0.0.0.0', port), Handler)
     print(f'\033[32m✓\033[0m 服务器启动：http://localhost:{port}')
-    print(f'  打开游戏：http://localhost:{port}/preview.html')
+    print(f'  打开游戏：http://localhost:{port}/')
     print(f'  方舟代理：http://localhost:{port}/api/ark')
     try:
         server.serve_forever()

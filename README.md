@@ -21,7 +21,7 @@
 3. 在部署配置页的 **Environment Variables** 中添加大模型密钥：
    - Name: `ARK_KEY`
    - Value: `你的火山引擎方舟_API_KEY`
-4. 点击 **Deploy**。Vercel 会自动将根目录的静态文件（`preview.html`）作为入口，并将 `api/ark.js` 部署为 Edge Function 来代理 AI 请求，解决跨域并隐藏真实 API Key。
+4. 点击 **Deploy**。Vercel 会自动将根目录的静态文件（`index.html`）作为入口，并将 `api/ark.js` 部署为 Edge Function 来代理 AI 请求，解决跨域并隐藏真实 API Key。
 
 ### 方案 B：本地快速启动 (开发调试)
 
@@ -41,7 +41,7 @@
    python3 server.py
    ```
    *本地的 `server.py` 会自动读取 `.env` 并提供和 Vercel 一致的代理接口体验。*
-4. **访问游戏**：在浏览器打开 [http://localhost:8899/preview.html](http://localhost:8899/preview.html)
+4. **访问游戏**：在浏览器打开 [http://localhost:8899/index.html](http://localhost:8899/index.html)
 
 ---
 
@@ -52,13 +52,12 @@
 ### 核心目录树
 ```text
 qiuzhao-game/
-├── preview.html         # 核心！单文件前端，包含完整的极简 UI、游戏引擎与 AI Prompt 逻辑
+├── index.html           # 核心！单文件前端，包含完整的极简 UI、游戏引擎与 AI Prompt 逻辑
 ├── api/
 │   └── ark.js           # Vercel Serverless Edge Function，用于线上代理大模型请求
-├── vercel.json          # Vercel 路由配置（将 / 重写到 preview.html）
+├── vercel.json          # Vercel 配置（包含 CORS 规则）
 ├── server.py            # Python 本地开发服务器（等效替代 api/ark.js 方便本地脱机调试）
-├── .env                 # 本地环境变量配置（包含 ARK_KEY）
-└── src/                 # （历史保留）Taro 工程源码目录，如需编译微信小程序时使用
+└── .env                 # 本地环境变量配置（包含 ARK_KEY）
 ```
 
 ## ⚙️ AI 大模型配置指南 (二次开发)
@@ -67,7 +66,7 @@ qiuzhao-game/
 
 1. 登录 [火山引擎方舟控制台](https://console.volcengine.com/ark)。
 2. 创建一个**在线推理接入点**（Endpoint），获取接入点 ID（如 `ep-xxxxxxxx`）。
-3. 修改 `preview.html` 中的模型配置（约第 1775 行）：
+3. 修改 `index.html` 中的模型配置（约第 1775 行）：
    ```javascript
    const ARK_MODEL = 'ep-你的接入点ID'
    ```
@@ -77,7 +76,7 @@ qiuzhao-game/
 
 ## 🎨 扩展与定制玩法
 
-如果你想增加新的游戏事件或修改难度，可以在 `preview.html` 中直接修改：
+如果你想增加新的游戏事件或修改难度，可以在 `index.html` 中直接修改：
 - **新增固定事件**：在 `FIXED_EVENTS` 数组中添加对象。游戏引擎会根据设定的 `chapter` 自动按序触发。
 - **调整初始数值**：修改 `getInitialAttributes(player)` 函数中不同学校/背景对开局属性的增减益。
 - **修改难度**：在 Prompt 模板（`generateSingleEvent` 函数内）调整 AI 对“努力值”和“压力值”的奖惩幅度限制。
